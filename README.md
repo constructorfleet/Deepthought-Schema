@@ -82,7 +82,7 @@ fathoms:
   conversion_to_si: 1.8288
 ```
 
-By specifying the conversion factor in relation to SI units, conversion between units is trivial and allows for wider,
+By specifying the conversion factor in relation to [International System Units](https://en.wikipedia.org/wiki/International_System_of_Units) (SI), conversion between units is trivial and allows for wider,
 easier adoption in more systems and projects.
 
 ### Data Types
@@ -198,7 +198,13 @@ units in the system.
 
 Use cases can be chained, accept multiple models, provide permission validation and are completely reusable.
 
-#### Chained Use Cases with Multiple Input Models
+## Chained Use Cases with Multiple Input Models
+
+Most architectural philosophies preach of the ATOMIC! Atomic commits, atomic classes, atomic use cases. It makes sense
+to reuse use cases, and put them together like legos or microservices. Using the Use Case schema, you can specify the 
+next use case in the chain. Inputs can be trusted and output models must be dimensionally possible from the input models
+for the code-generation scaffolding to work.
+
 ```yaml
 # usecases.yml
 calc_density:
@@ -289,3 +295,22 @@ get_cylinder_density:
   output: cylinder_density
   next: calc_time_to_empty
 ```
+
+### MORE TO COME
+
+TODO
+
+## Where's the value? I don't get it - Editorial
+
+I like reading about software architectural design. I also am one of those blatantly guilty of focusing on code, not
+the documentation - and if you know me, I'm lazy. I don't write a lot of APIs, which seems to be the focus of
+GraphQL - but the idea of schema-first, validated, self-describing resonated with me. Take Ansible, with well-defined
+YAML formatted documentation, the ArgSpec must still be implemented; allowing for implementation/documentation to
+divergence.
+
+The goal here is to create a specification that is simple, scalable and consistent enough for non-developers to 
+maintain; A specification that can drive human-readable documentation. Automatically generate descriptive and meaningful 
+classes in almost any language. Testing is a natural consequence of the specification and constraints therein.
+
+Is this complete? Not by a long shot. If you see the benefit, join me! Because, for me, this will completely change how
+I approach software development.
