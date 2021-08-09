@@ -30,7 +30,7 @@ feet:
   type: int
   name: Feet
   description: The number of feet length units
-  unit: feet
+  unit: foot
   coerce: True
   constraints:
     - minimum: 0
@@ -39,7 +39,7 @@ inches:
   type: int
   name: Inches
   description: The remaining inch length units
-  unit: inches
+  unit: inch
   coerce: True
   constraints:
     - minimum: 0
@@ -53,7 +53,7 @@ meters:
   type: float
   name: Meters
   description: The number of meter length units
-  unit: meters
+  unit: meter
   coerce: True
   constrainst:
     - minimum: 0
@@ -76,6 +76,7 @@ fathoms:
   name: Fathoms
   description: A length measure usually referring to a depth.
   label: fathom
+  lable_plural: fathoms
   label_short: fm
   measures: length
   conversion_to_si: 1.8288
@@ -101,7 +102,7 @@ Returning to our previous example, we can now define the `height` Data Type:
 height:
   name: Height
   description: The vertical length measurement of the Person model
-  unit: feet
+  unit: foot
   fields:
     - feet
     - inches
@@ -124,7 +125,7 @@ Since there is only a single field, the Data Type assumes the unit of the field 
 height:
   name: Height
   description: The vertical length measurement of the Person model
-  unit: fathoms
+  unit: fathom
   fields: meters
 ```
 
@@ -152,7 +153,7 @@ cylinder:
 pringles_can_density:
   name: Density of a Pringles Can
   description: The mean density of the measured Pringles can
-  units: kg / m^3
+  units: kilogram / meter ^ 3
 ```
 
 ### Domain-Interfacing Use Cases
@@ -189,13 +190,102 @@ cylinder:
 pringles_can_density:
   name: Density of a Pringles Can
   description: The mean density of the measured Pringles can
-  units: m / s
+  units: meter / second
 ```
 
 There is no way that the input units, length and mass - could possibly generate meters per second based on the known
 units in the system.
 
-Use cases can also specify required permissions, (and more).
+Use cases can be chained, accept multiple models, provide permission validation and are completely reusable.
 
-## Code Generation
-See codegen README for how to generate the models, scaffolds, unit tests, and documentation from the schema
+#### Chained Use Cases with Multiple Input Models
+```yaml
+# usecases.yml
+calc_density:
+  name: Calculate the Density of a Cylinder
+  description: Calculates the density of a cylinder
+  input: cylinder
+  output: pringles_can_density
+  next: calc_time_to_empty
+
+calc_time_to_empty:
+  name: Calculate time to empty can
+  description: Calculates the time it will take to consume an entire pringles can
+  input:
+    - pringles_can_density
+    - density_reduction_rate
+  output: time_per_can
+  next: extrapolate
+
+calc_time_to_empty_pantry:
+  name: Calculate the time to empty the pantry
+  description: Extrapolates the time it takes to empty a can of pringles to approximate the time to devour the pantry
+  input:
+    - time_per_can
+    - cylinder
+    - pantry_dimensions
+  output: time_to_obesity
+```
+
+## Re-usability Of Schemas
+
+Hard-coding, names and descriptions as above doesn't facilitate portability or re-usability. To rectify Units, 
+Field, Data Types can utilize template replacers of the structures above them.
+
+```yaml
+# units.length.yml
+feet:
+  type: int
+  name: Feet
+  description: The number of feet that fully fit in the measure of {{ model.attribute.name }} for {{ model.name }} 
+  unit: feet
+  coerce: True
+  constraints:
+    - minimum: 0
+      maximum: 8
+inches:
+  type: int
+  name: Inches
+  description: The number of inches that fullfill the remaining measure of {{ model.attribute.name }} for {{ {{ model.name }} 
+  unit: inch
+  coerce: True
+  constraints:
+    - minimum: 0
+    - maximum: 12
+mass:
+  type: float
+  name: Mass
+  description: The mass of {{ model.name }}
+  unit: gram
+  coerce: True
+  constraint:
+    - minimum: 0
+# datatypes.yml
+length:
+  name: {{ model.attribute.name }}
+  description: The length measure of {{ model.name }}'s {{ model.attribute.name }}
+  unit: foot
+  fields:
+    - feet
+    - inches
+# models.yml
+cylinder:
+  name: {{ usecase.focus }}
+  description: Measurements of a can of a {{ usecase.focuse }}
+  attributes:
+    - radius
+    - mass
+    - height
+cylinder_density:
+  name: Density of a {{ usecase.focus }}
+  description: The mean density of the measured {{ usecase.focus}}
+  unit: kilogram / meter ^ 3
+# usecases.yml
+get_cylinder_density:
+  name: Get {{ this.focus }} Density
+  focus: Pringles Can
+  description: Calculates the density of a {{ this.focus }}
+  input: cylinder
+  output: cylinder_density
+  next: calc_time_to_empty
+```
