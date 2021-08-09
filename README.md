@@ -55,7 +55,7 @@ meters:
   description: The number of meter length units
   unit: meter
   coerce: True
-  constrainst:
+  constraints:
     - minimum: 0
     - maximum: 3
     - precision: 0.01
@@ -75,9 +75,10 @@ information:
 fathoms:
   name: Fathoms
   description: A length measure usually referring to a depth.
-  label: fathom
-  lable_plural: fathoms
-  label_short: fm
+  label:
+    single: fathom
+    plural: fathoms
+    symbole: fm
   measures: length
   conversion_to_si: 1.8288
 ```
@@ -153,7 +154,7 @@ cylinder:
 pringles_can_density:
   name: Density of a Pringles Can
   description: The mean density of the measured Pringles can
-  units: kilogram / meter ^ 3
+  unit: kilogram / meter ^ 3
 ```
 
 ### Domain-Interfacing Use Cases
@@ -190,7 +191,7 @@ cylinder:
 pringles_can_density:
   name: Density of a Pringles Can
   description: The mean density of the measured Pringles can
-  units: meter / second
+  unit: meter / second
 ```
 
 There is no way that the input units, length and mass - could possibly generate meters per second based on the known
@@ -240,11 +241,11 @@ Field, Data Types can utilize template replacers of the structures above them.
 
 ```yaml
 # units.length.yml
-feet:
+foot:
   type: int
   name: Feet
   description: The number of feet that fully fit in the measure of {{ model.attribute.name }} for {{ model.name }} 
-  unit: feet
+  mesurement: length
   coerce: True
   constraints:
     - minimum: 0
@@ -253,7 +254,7 @@ inches:
   type: int
   name: Inches
   description: The number of inches that fullfill the remaining measure of {{ model.attribute.name }} for {{ {{ model.name }} 
-  unit: inch
+  mesurement: length
   coerce: True
   constraints:
     - minimum: 0
