@@ -1,6 +1,6 @@
 # Deepthought-Schema
-Specification schema for models, data types, and domain-interfacing operations that facilitate Documentation Oriented 
-Development for self-coding, self-validation, self-describing and self-testing generated source code.
+Specification schema for models, data types, and domain-interfacing operations that facilitate **Documentation Oriented 
+Development** for self-generated-code, self-validating, self-describing, auto-tested. and self-testing generated source code scaffolding for the Domain-Interfacing logic.
 
 ## Schema Types
 
@@ -305,13 +305,12 @@ TODO
 
 I have always been drawn to software architectural design. I also am one of those blatantly guilty of focusing on code, 
 not the documentation - and if you know me, I'm lazy. I don't write a lot of APIs, which seems to be the focus of
-GraphQL - but the idea of schema-first, validated, self-describing resonated with me. Take Ansible, with well-defined
-YAML formatted documentation, the ArgSpec must still be implemented; allowing for implementation/documentation to
-divergence.
+GraphQL and Swagger - but the idea of schema-first, validated, self-describing... resonated with me. Take Ansible, with well-defined
+YAML formatted documentation, the ArgSpec must still be implemented; allowing for divergence in implementation and documentation.
 
 The goal here is to create a specification that is simple, scalable and consistent enough for non-developers to 
-maintain; A specification that can drive human-readable documentation. Automatically generate descriptive and meaningful 
-classes in almost any language. Testing is a natural consequence of the specification and constraints therein.
+maintain. A specification that can drive and generate human-readable documentation (Swagger). Automatically generate descriptive and meaningful 
+classes in almost any language (GraphQL). Testing is a natural consequence of the specification and constraints therein (TTD).
 
 Is this complete? Not by a long shot. If you see the benefit, join me! Because, for me, this will completely change how
 I approach software development.
