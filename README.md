@@ -302,8 +302,8 @@ TODO
 
 ## Where's the value? I don't get it - Editorial
 
-I like reading about software architectural design. I also am one of those blatantly guilty of focusing on code, not
-the documentation - and if you know me, I'm lazy. I don't write a lot of APIs, which seems to be the focus of
+I have always been drawn to software architectural design. I also am one of those blatantly guilty of focusing on code, 
+not the documentation - and if you know me, I'm lazy. I don't write a lot of APIs, which seems to be the focus of
 GraphQL - but the idea of schema-first, validated, self-describing resonated with me. Take Ansible, with well-defined
 YAML formatted documentation, the ArgSpec must still be implemented; allowing for implementation/documentation to
 divergence.
