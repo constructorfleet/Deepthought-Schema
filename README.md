@@ -26,33 +26,25 @@ Traditionally, this would be a field of type `int` - if you're lucky or forward 
 With DeepThought, this field could be specified as:
 ```yaml
 # person.fields.yml
-feet:
-  type: int
-  name: Feet
-  description: The number of feet length units
+height:
+  type: float
+  name: Height
+  description: How tall the person is
   unit: foot
   coerce: True
   constraints:
     - minimum: 0
-      maximum: 8
-inches:
-  type: int
-  name: Inches
-  description: The remaining inch length units
-  unit: inch
-  coerce: True
-  constraints:
-    - minimum: 0
-    - maximum: 12
+    - maximum: 8
+    - precision: 1 inch
 ```
 
 Or, for the rest of the world:
 ```yaml
 # person.fields.yml
-meters:
+height:
   type: float
-  name: Meters
-  description: The number of meter length units
+  name: Height
+  description: How tall the person is
   unit: meter
   coerce: True
   constraints:
@@ -61,240 +53,241 @@ meters:
     - precision: 0.01
 ```
 
+You tell DeepThought the unit to present to the Domain-Interfacing Use Case.
+
+### Constraints
+
+The constraints placed on a field, as seen above, can be expressed with inferred or explicit units. Constraints apply to
+a set of underlying types: `minimum` is not a meaningful constraint to a `string` or `byte`.
+
+#### Built-in Constraints
+
+TODO
+
 ### Units
 
-DeepThought comes bundled with the conversion factors for commonly used units - but allows for externally defined units.
-Through the use of dimensional fields, DeepThought will also test and validate your calculation's correctness through
-dimensional analysis. Of course, not every field or project has a need for units - unit-less scalars are just as valid.
+DeepThought's extensible unit system comes bundled with commonly used units. Through the use of dimensional fields, 
+DeepThought will also test and validate correctness through dimensional analysis. Of course, not every field has a need 
+for units - unit-less scalars are just as valid.
 
 To define custom units, provide a key that can be used in fields to refer to and a few other basic pieces of 
 information:
 
 ```yaml
 # units.yml
-fathoms:
+fathom:
   name: Fathoms
   description: A length measure usually referring to a depth.
   label:
     single: fathom
     plural: fathoms
-    symbole: fm
-  measures: length
-  conversion_to_si: 1.8288
+    symbol: fm
+  conversion:
+    unit: meter
+    factor: 1.8288
 ```
 
-By specifying the conversion factor in relation to [International System Units](https://en.wikipedia.org/wiki/International_System_of_Units) (SI), conversion between units is trivial and allows for wider,
-easier adoption in more systems and projects.
+While any unit can be specified in the conversion attribute, specifying the conversion factor in relation to 
+[International System Units](https://en.wikipedia.org/wiki/International_System_of_Units) (SI), allows for wider, easier
+adoption in more systems and projects.
 
-### Data Types
-
-While the field example above may appear verbose, just take a second to imagine writing code to handle all the 
-various combinations of units, and the tests to validate those fields are within specification. True, this amount of
-flexibility may not be required for every project, but with DeepThought, it's baked in with minimal-to-no performance
-impact.
-
-Data Types arise through the use of specified fields, and desired values (dimensional or scalar) of the Models that feed
-the domain layer implementation of your project.
-
-Returning to our previous example, we can now define the `height` Data Type:
+To specify an entirely new dimensional unit, simply omit the conversion attribute:
 
 ```yaml
-# datatypes.yml
-height:
-  name: Height
-  description: The vertical length measurement of the Person model
-  unit: foot
-  fields:
-    - feet
-    - inches
+# units.yml
+click:
+  name: Clicks
+  description: The click count of something.
+  label:
+    single: Click
+    plural: Clicks
+    symbol: clicks
+
+slam:  # This may be meaningful to someone...
+  name: Slams
+  description: Count of something clicked being broken.
+  label:
+    single: Slam
+    plural: Slams
+    symbol: slams
+  conversion:
+    unit: click
+    factor: .001  # If clicked 1000 times, must be broken
 ```
 
-The `meters` schema is far more simple:
-
-```yaml
-# datatypes.yml
-height:
-  name: Height
-  description: The vertical length measurement of the Person model
-  fields: meters
-```
-
-Since there is only a single field, the Data Type assumes the unit of the field unless otherwise specified:
-
-```yaml
-# datatypes.yml
-height:
-  name: Height
-  description: The vertical length measurement of the Person model
-  unit: fathom
-  fields: meters
-```
+#### Built-in Units
 
 ### Models
 
-Models are the data structures that are directly consumed, and returned by domain interfacing operations. Models 
-comprise the necessary Data Types to fully describe that which the domain can consume, manipulate, transform, parse,
-etc. and be passed to the next layer to Domain-Edge Interactors.
+Models are the data structures that are directly consumed, or returned by, Domain-Interfacing Use Cases. Models 
+comprise the necessary Fields to fully describe that which the domain can consume, manipulate, transform, parse, or
+return.
 
-Assume, you had a use case for calculating the volumetric density of a can of pringles and created the following models:
+Assume, you had a use case for calculating the volumetric density of a can of Pringles and created the following models:
 
 ```yaml
-# models.yml
-cylinder:
-  name: Pringles Can
-  description: Measurements of a can of Pringles
-  attributes:
+# pringles.fields.yml
+radius:
+  type: float
+  name: Radius
+  description: Distance from edge to center of a Pringles can
+  unit: centimeter
+  coerce: True
+height:
+  type: float
+  name: Height
+  description: Distance from bottom to top of a Pringles can
+  unit: inches
+  coerce: True
+mass:
+  type: float
+  name: Mass
+  description: The amount of matter contained in a Pringles can
+  unit: grams
+  coerce: True
+density:
+  name: Pringles Can Density 
+  description: The mean density of the a Pringles can
+  unit: kilogram / (meter ^ 3)
+      
+# pringles.models.yml
+pringles_can_dimensions:
+  name: Pringles Can Dimensions
+  description: The physical measurements of a can of Pringles
+  fields:
     - radius
     - mass
     - height
-```
 
-```yaml
-# models.yml
 pringles_can_density:
-  name: Density of a Pringles Can
-  description: The mean density of the measured Pringles can
-  unit: kilogram / meter ^ 3
+  fields: density
 ```
 
 ### Domain-Interfacing Use Cases
 
-When specifying Domain-Interfacing Use Cases, Deepthought has no knowledge of your implementation of the domain. Be it
-a single method, a chain of methods - that is up to you. Specify the input model, and the output model - knowing you can
-trust that your input is valid and tested and in the exact form that is expected. However, if your dimensional analysis
-is incorrect, no scaffold for your use case will be generated.
+When specifying Domain-Interfacing Use Cases, Deepthought has no knowledge of your implementation. Be it a single 
+method, a chain of methods - that is up to you. Specify the input Model, and the output Model - knowing you can trust 
+that your input is valid, tested, and in the exact form that is expected. If dimensionally correct, DeepThought will
+generate the scaffolded code for you to implement - if incorrect, you will know before you even start coding.
 
-Given the Use Case specification:
+Correct:
 
 ```yaml
-# usecases.yml
-calc_density:
+# pringles.usecases.yml
+calculate_can_density:
   name: Calculate Density of Cylinder
   description: Calculates the density of a cylinder
-  input: cylinder
+  input: pringles_can_dimensions
   output: pringles_can_density
 ```
 
+Incorrect:
 ```yaml
-# models.yml
-cylinder:
-  name: Pringles Can
-  description: Measurements of a can of Pringles
-  attributes:
-    - radius
-    - mass
-    - height
-```
-
-```yaml
-# models.yml
+# pringles.fields.yml
 pringles_can_density:
-  name: Density of a Pringles Can
-  description: The mean density of the measured Pringles can
+  name: Pringles Can Density 
+  description: The mean density of the a Pringles can
   unit: meter / second
+  
+# pringles.usecases.yml
+calculate_can_density:
+  name: Calculate Density of Cylinder
+  description: Calculates the density of a cylinder
+  input: pringles_can_dimensions
+  output: pringles_can_density
 ```
 
-There is no way that the input units, length and mass - could possibly generate meters per second based on the known
-units in the system.
+There is no way that the input units (`inches`/`centimeter` and `grams`) - could possibly be yield to the expected
+units (`meter / second`) specified in the `density` model based on the known units in the system.
 
-Use cases can be chained, accept multiple models, provide permission validation and are completely reusable.
+Use Cases can be chained, accept multiple models, provide permission validation and are completely reusable.
 
 ## Chained Use Cases with Multiple Input Models
 
-Most architectural philosophies preach of the ATOMIC! Atomic commits, atomic classes, atomic use cases. It makes sense
-to reuse use cases, and put them together like legos or microservices. Using the Use Case schema, you can specify the 
-next use case in the chain. Inputs can be trusted and output models must be dimensionally possible from the input models
-for the code-generation scaffolding to work.
+Most architectural philosophies preach of the "ATOMIC!": Atomic commits, atomic classes, atomic use cases. It makes 
+sense to reuse Use Cases, and put them together like Legos or microservices. Using the Use Case schema, you can specify 
+the next use case in the chain. Inputs can be trusted, and output models must be dimensionally possible from the input
+models for the code-generated scaffolding to work.
 
 ```yaml
 # usecases.yml
-calc_density:
+calculate_cylinder_density:
   name: Calculate the Density of a Cylinder
   description: Calculates the density of a cylinder
-  input: cylinder
+  input: pringles_can_dimensions
   output: pringles_can_density
-  next: calc_time_to_empty
+  next: calculate_time_to_empty
 
-calc_time_to_empty:
-  name: Calculate time to empty can
-  description: Calculates the time it will take to consume an entire pringles can
+calculate_time_to_empty:
+  name: Calculate the time to empty a can of Pringles
+  description: Calculates the time it will take to consume an entire Pringles can. Once You Pop, You Can't Stop!
   input:
-    - pringles_can_density
-    - density_reduction_rate
-  output: time_per_can
-  next: extrapolate
+    - pringles_can_dimensions
+    - density_consumption_rate
+  output: time_to_empty_can
+  next: extrapolate_emptying_pantry
 
-calc_time_to_empty_pantry:
+extrapolate_emptying_pantry:
   name: Calculate the time to empty the pantry
-  description: Extrapolates the time it takes to empty a can of pringles to approximate the time to devour the pantry
+  description: Extrapolates the time it takes to empty a can of Pringles to approximate the time to devour the pantry full of Pringles.
   input:
-    - time_per_can
-    - cylinder
+    - time_to_empty_can
+    - pringles_can_density
     - pantry_dimensions
   output: time_to_obesity
 ```
 
 ## Re-usability Of Schemas
 
-Hard-coding, names and descriptions as above doesn't facilitate portability or re-usability. To rectify Units, 
-Field, Data Types can utilize template replacers of the structures above them.
+Hard-coding names and descriptions, as above, doesn't facilitate portability or re-usability. To rectify Units, 
+Field, Data Types can utilize template replacers of the containing structures.
 
 ```yaml
-# units.length.yml
-foot:
-  type: int
-  name: Feet
-  description: The number of feet that fully fit in the measure of {{ model.attribute.name }} for {{ model.name }} 
-  mesurement: length
+# fields.yml
+radius:
+  type: float
+  name: Radius
+  description: Radial dimension of {{ model.name }}
+  unit: centimeter
   coerce: True
-  constraints:
-    - minimum: 0
-      maximum: 8
-inches:
-  type: int
-  name: Inches
-  description: The number of inches that fullfill the remaining measure of {{ model.attribute.name }} for {{ {{ model.name }} 
-  mesurement: length
+height:
+  type: float
+  name: Height
+  description: Top to bottom dimension of {{ model.name }}
+  unit: inches
   coerce: True
-  constraints:
-    - minimum: 0
-    - maximum: 12
 mass:
   type: float
   name: Mass
-  description: The mass of {{ model.name }}
-  unit: gram
+  description: Physical quantity of matter in {{ model.usecase.focus }}
+  unit: grams
   coerce: True
-  constraint:
-    - minimum: 0
-# datatypes.yml
-length:
-  name: {{ model.attribute.name }}
-  description: The length measure of {{ model.name }}'s {{ model.attribute.name }}
-  unit: foot
-  fields:
-    - feet
-    - inches
+density:
+  type: float
+  name: Density of {{ model.usecase.focus }} 
+  description: The mean density of {{ model.usecase.focus }}
+  unit: kilogram / (meter ^ 3)
+  
 # models.yml
-cylinder:
-  name: {{ usecase.focus }}
-  description: Measurements of a can of a {{ usecase.focuse }}
-  attributes:
+dimensions:
+  name: Dimensions of {{ usecase.focus }}
+  description: The physical measurements of {{ usecase.focus }}
+  fields:
     - radius
     - mass
     - height
-cylinder_density:
-  name: Density of a {{ usecase.focus }}
-  description: The mean density of the measured {{ usecase.focus}}
-  unit: kilogram / meter ^ 3
+
 # usecases.yml
 get_cylinder_density:
-  name: Get {{ this.focus }} Density
+  name: Get Density of {{ this.focus }}
+  description: Calculates mean density of {{ this.focus }} 
+  input: dimensions
+  output: density
+
+get_pringles_can_density:
+  extends: get_cylinder_density
   focus: Pringles Can
-  description: Calculates the density of a {{ this.focus }}
-  input: cylinder
-  output: cylinder_density
-  next: calc_time_to_empty
+  next: calculate_time_to_empty
 ```
 
 ### MORE TO COME
