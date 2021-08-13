@@ -1,0 +1,34 @@
+$id: https://teagantotally.rocks/DeepThought/field.schema.yaml
+$schema: https://json-schema.org/draft/2020-12/schema
+description: Specification for defining a Field in DeepThought
+type: object
+properties:
+  name:
+    type: string
+    min
+  type:
+    enum:
+      - string
+      - byte
+      - float
+      - int
+      - double
+  description:
+    type: string
+  unit:
+    type: string
+  coerce:
+    type: boolean
+    default: True
+  constraints:
+    type: array
+    items:
+      type: object
+      patternProperties:
+        "[a-z]([a-z]_)+[a-z]?":
+          type: number
+required:
+  - id
+  - description
+  - label
+  - UNIT

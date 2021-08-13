@@ -1,0 +1,44 @@
+$id: https://teagantotally.rocks/DeepThought/unit.schema.yaml
+$schema: https://json-schema.org/draft/2020-12/schema
+description: Specification for defining Units in DeepThought
+type: object
+properties:
+  id:
+    type: string
+    pattern: "[a-z]([a-z]_)+[a-z]?"
+  name:
+    type: string
+  description:
+    type: string
+  label:
+    type: object
+    properties:
+      single:
+        type: string
+        pattern: "[a-z]+"
+      plural:
+        type: string
+        pattern: "[a-z]+"
+      symbol:
+        type: string
+        pattern: "[a-z0-9]+"
+    required:
+      - single
+      - plural
+      - symbol
+  conversion:
+    type: object
+    properties:
+      unit:
+        type: string
+        pattern: "[a-z]([a-z]_)+[a-z]?"
+      factor:
+        type: number
+        format: float
+    required:
+      - unit
+      - factor
+required:
+  - id
+  - description
+  - label
