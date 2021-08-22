@@ -1,0 +1,9 @@
+id: megabitspersecond
+name: Megabits per second
+description: The number of megabits transmitted per second
+symbol: mbps
+unit:
+  unit1: megabit
+  unit2:
+    inverseUnit:
+      unit: second

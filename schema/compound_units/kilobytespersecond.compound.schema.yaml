@@ -1,0 +1,9 @@
+id: kilobytespersecond
+name: Kilobytes per second
+description: The number of kilobytes transmitted per second
+symbol: kBps
+unit:
+  unit1: kilobyte
+  unit2:
+    inverseUnit:
+      unit: second

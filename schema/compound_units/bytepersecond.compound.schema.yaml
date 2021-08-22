@@ -1,0 +1,9 @@
+id: bytespersecond
+name: Bytes per second
+description: The number of bytes transmitted per second
+symbol: Bps
+unit:
+  unit1: byte
+  unit2:
+    inverseUnit:
+      unit: second
