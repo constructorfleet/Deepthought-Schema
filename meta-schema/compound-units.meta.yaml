@@ -45,7 +45,7 @@ definitions:
       - $ref: "#/definitions/simpleUnitSchema"
       - $ref: "#/definitions/productUnitSchema"
       - $ref: "#/definitions/exponentUnitSchema"
-      - $ref: "#/definitions/inverseUnitSchema"
+      - $ref: "#/definitions/inverseUnitShema"
       - $ref: "#/definitions/groupUnitSchema"
 properties:
   id:
