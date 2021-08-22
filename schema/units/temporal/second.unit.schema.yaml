@@ -1,0 +1,7 @@
+id: second
+name: Second
+description: SI Metric Unit for Time
+label:
+  single: second
+  plural: seconds
+  symbol: s

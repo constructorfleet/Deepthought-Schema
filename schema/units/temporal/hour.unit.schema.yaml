@@ -1,0 +1,10 @@
+id: hour
+name: Hour
+description: 3600 Seconds
+label:
+  single: hour
+  plural: hours
+  symbol: hr
+conversion:
+  unit: second
+  conversion: 0.00027777778
