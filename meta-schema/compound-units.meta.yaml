@@ -62,7 +62,6 @@ properties:
   symbol:
     type: string
     minLength: 1
-    maxLength: 4
     pattern: "^[a-zA-Z _\-\/\^]+$"
   unit:
     $ref: "#/definitions/compoundUnitSchema"
