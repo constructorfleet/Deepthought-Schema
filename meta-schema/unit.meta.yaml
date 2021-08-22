@@ -1,0 +1,55 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/unit"
+title: Unit schema validating meta-schema
+
+type: object
+definitions:
+  labelSchema:
+    type: object
+    properties:
+      single:
+        type: string
+        minLength: 1
+        pattern: "^[a-z _-]+$"
+      plural:
+        type: string
+        minLength: 1
+        pattern: "^[a-z _-]+$"
+      symbol:
+        type: string
+        minLength: 1
+        maxLength: 4
+        pattern: "^[a-z _-]{1,4}$"
+    required:
+      - single
+      - plural
+      - symbol
+  conversionSchema:
+    type: object
+    properties:
+      unit:
+        type: string
+        minLength: 1
+        pattern: "^[a-zA-Z_]+$"
+      conversion:
+        type: number
+        format: float
+    required:
+      - unit
+      - conversion
+properties:
+  name:
+    type: string
+    minLength: 1
+    pattern: "^[A-Z][a-zA-Z_- ]+$"
+  description:
+    type: string
+    minLength: 1
+  label:
+    $ref: "#/definitions/labelSchema"
+  conversion:
+    $ref: "#/definitions/conversionSchema"
+required:
+  - name
+  - description
+  - label
