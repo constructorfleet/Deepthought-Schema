@@ -2,7 +2,9 @@ $schema: "https://json-schema.org/draft/2020-12/schema"
 $id: "https://teagantotally.rocks/deepthought/meta/unit"
 title: Unit schema validating meta-schema
 
-type: object
+type:
+  - object
+  - boolean
 definitions:
   labelSchema:
     type: object
@@ -53,3 +55,4 @@ required:
   - name
   - description
   - label
+default: true
