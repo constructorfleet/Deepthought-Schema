@@ -1,0 +1,9 @@
+id: velocity
+name: Velocity
+description: The rate of change in postion over time
+type: float
+unit:
+  unit1: meter
+  unit2:
+    inverseUnit:
+      unit: second
