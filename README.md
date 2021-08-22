@@ -1,5 +1,5 @@
 # Deepthought-Schema
-Specification schema for models, data types, and domain-interfacing operations that facilitate **Documentation Oriented 
+Specification schema for models, data types, and domain-interfacing operations that facilitate **Documentation Driven 
 Development** for self-generated-code, self-validating, self-describing, auto-tested. and self-testing generated source code scaffolding for the Domain-Interfacing logic.
 
 ## Schema Types
