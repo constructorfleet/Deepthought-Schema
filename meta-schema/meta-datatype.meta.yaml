@@ -24,7 +24,47 @@ definitions:
   explicitPrecisionSchema:
     type: string
     pattern: "^[0-9]*\.[0-9]* [a-z_]+$"
-
+  simpleUnitSchema:
+    type: string
+    pattern: "[a-z][a-z_]+"
+  productUnitSchema:
+    type: object
+    properties:
+      unit1:
+        $ref: "#/definitions/compoundUnitSchema"
+      unit2:
+        $ref: "#/definitions/compoundUnitSchema"
+    required:
+      - unit1
+      - unit2
+  inverseUnitShema:
+    type: object
+    properties:
+      inverseUnit:
+        $ref: "#/definitions/compoundUnitSchema"
+    required:
+      - inverseUnit
+  exponentUnitSchema:
+    type: object
+    properties:
+      unit:
+        $ref: "#/definitions/compoundUnitSchema"
+      exponent:
+        type: number
+  groupUnitSchema:
+    type: object
+    properties:
+      groupedUnits:
+        $ref: "#/definitions/compoundUnitSchema"
+    required:
+      - groupedUnits
+  compoundUnitSchema:
+    anyOf:
+      - $ref: "#/definitions/simpleUnitSchema"
+      - $ref: "#/definitions/productUnitSchema"
+      - $ref: "#/definitions/exponentUnitSchema"
+      - $ref: "#/definitions/inverseUnitSchema"
+      - $ref: "#/definitions/groupUnitSchema"
 properties:
   type:
     $ref: "#/definitions/typeSchema"
@@ -36,8 +76,7 @@ properties:
     type: string
     minLength: 1
   unit:
-    type: string
-    pattern: "^(?:\(?(?:[a-z_]+(?:\^[0-9]+)? ?)+\)?)(?:\^[0-9]+)?(?: ?\/ ?(?:\(?(?:[a-z_]+(?:\^[0-9]+)? ?)+\)?)(?:\^[0-9]+)?)?$"
+    $ref: "#/definitions/compountUnitSchema"
   coerce:
     type: boolean
     default: true
