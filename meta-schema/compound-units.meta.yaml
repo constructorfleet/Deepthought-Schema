@@ -62,7 +62,7 @@ properties:
   symbol:
     type: string
     minLength: 1
-    pattern: "^[a-zA-Z _\-\/\^]+$"
+    pattern: "^(?:[a-zA-Z _\-\/]+(?:[\^][0-9]+))+$"
   unit:
     $ref: "#/definitions/compoundUnitSchema"
 required:
