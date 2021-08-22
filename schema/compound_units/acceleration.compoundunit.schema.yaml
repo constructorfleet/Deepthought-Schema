@@ -1,6 +1,7 @@
 id: acceleration
 name: Acceleration
 description: The rate of change in velocity over time
+symbol: m/s^2
 unit:
   unit1: meter
   unit2:

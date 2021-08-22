@@ -49,7 +49,9 @@ definitions:
       - $ref: "#/definitions/groupUnitSchema"
 properties:
   id:
-    $ref: "#/definitions/typeSchema"
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
   name:
     type: string
     minLength: 1
@@ -57,10 +59,17 @@ properties:
   description:
     type: string
     minLength: 1
+  symbol:
+    type: string
+    minLength: 1
+    maxLength: 4
+#    pattern: "^[a-z _-\\/]+$"
   unit:
     $ref: "#/definitions/compoundUnitSchema"
 required:
+  - id
   - name
   - description
+  - symbol
   - unit
 default: true
