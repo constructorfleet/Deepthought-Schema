@@ -1,0 +1,10 @@
+id: acceleration
+name: Acceleration
+description: The rate of change in velocity
+type: float
+unit:
+  unit1: meter
+  unit2:
+    inverseUnit:
+      unit: second
+      exponent: 2

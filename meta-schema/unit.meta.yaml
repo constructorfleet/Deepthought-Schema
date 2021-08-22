@@ -47,7 +47,7 @@ properties:
   name:
     type: string
     minLength: 1
-    pattern: "^[A-Z][a-zA-Z]+$"
+    pattern: "^[A-Z][a-zA-Z ]+$"
   description:
     type: string
     minLength: 1
