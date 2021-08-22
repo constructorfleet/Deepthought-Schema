@@ -1,0 +1,7 @@
+id: kilogram
+name: Kilogram
+description: SI Metric Unit for Mass
+label:
+  single: kilogram
+  plural: kilograms
+  symbol: kg

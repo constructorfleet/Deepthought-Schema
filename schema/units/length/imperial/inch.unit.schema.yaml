@@ -1,0 +1,10 @@
+id: inch
+name: Inch
+description: Imperial Unit for small Length
+label:
+  single: inch
+  plural: inches
+  symbol: in
+conversion:
+  unit: ft
+  conversion: 0.083333333

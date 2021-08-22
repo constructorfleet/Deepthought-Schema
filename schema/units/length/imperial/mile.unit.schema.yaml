@@ -1,0 +1,10 @@
+id: yard
+name: Yard
+description: 3 Feet
+label:
+  single: yard
+  plural: yards
+  symbol: yrd
+conversion:
+  unit: feet
+  conversion: 3

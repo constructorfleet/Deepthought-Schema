@@ -1,0 +1,7 @@
+id: meter
+name: Meter
+description: SI Metric Unit for Length
+label:
+  single: meter
+  plural: meters
+  symbol: m

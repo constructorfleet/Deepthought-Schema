@@ -1,0 +1,10 @@
+id: millimeter
+name: Millimeter
+description: 1/1000th of a Meter
+label:
+  single: millimeter
+  plural: millimeters
+  symbol: mm
+conversion:
+  unit: meter
+  conversion: 0.001

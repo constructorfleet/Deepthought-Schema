@@ -1,0 +1,10 @@
+id: pound
+name: Pound
+description: Imperial Unit for Mass
+label:
+  single: pound
+  plural: pounds
+  symbol: lb
+conversion:
+  unit: kilogram
+  conversion: 0.453592

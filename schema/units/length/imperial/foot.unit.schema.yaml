@@ -1,0 +1,10 @@
+id: foot
+name: Foot
+description: Imperial Unit for Length
+label:
+  single: foot
+  plural: feet
+  symbol: ft
+conversion:
+  unit: meter
+  conversion: 0.3048

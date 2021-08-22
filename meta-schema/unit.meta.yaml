@@ -40,10 +40,14 @@ definitions:
       - unit
       - conversion
 properties:
+  id:
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
   name:
     type: string
     minLength: 1
-    pattern: "^[A-Z][a-zA-Z_- ]+$"
+    pattern: "^[A-Z][a-zA-Z]+$"
   description:
     type: string
     minLength: 1
@@ -52,6 +56,7 @@ properties:
   conversion:
     $ref: "#/definitions/conversionSchema"
 required:
+  - id
   - name
   - description
   - label
