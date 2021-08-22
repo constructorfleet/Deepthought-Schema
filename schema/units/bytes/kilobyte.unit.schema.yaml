@@ -1,0 +1,10 @@
+id: kilobyte
+name: Kilobyte
+description: 1000 Bytes
+label:
+  single: kilobyte
+  plural: kilobyte
+  symbol: kB
+conversion:
+  unit: byte
+  conversion: 1000

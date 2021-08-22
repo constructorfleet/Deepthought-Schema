@@ -1,0 +1,10 @@
+id: gigabyte
+name: Gigabyte
+description: 1000000000 Bytes
+label:
+  single: gigabyte
+  plural: gigabyte
+  symbol: GB
+conversion:
+  unit: byte
+  conversion: 1000000000

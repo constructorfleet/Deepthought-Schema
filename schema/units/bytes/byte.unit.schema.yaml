@@ -1,0 +1,10 @@
+id: byte
+name: Byte
+description: 8 bits
+label:
+  single: byte
+  plural: bytes
+  symbol: B
+conversion:
+  unit: bit
+  conversion: 8

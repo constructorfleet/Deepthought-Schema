@@ -1,0 +1,10 @@
+id: megabyte
+name: Megabyte
+description: 1000000 Bytes
+label:
+  single: megabyte
+  plural: megabyte
+  symbol: MB
+conversion:
+  unit: byte
+  conversion: 1000000

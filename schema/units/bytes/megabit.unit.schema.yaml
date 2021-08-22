@@ -1,0 +1,10 @@
+id: megaobit
+name: Megabit
+description: 1000000 bits
+label:
+  single: megaobit
+  plural: megaobits
+  symbol: mb
+conversion:
+  unit: bit
+  conversion: 1000000

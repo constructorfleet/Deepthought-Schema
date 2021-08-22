@@ -1,0 +1,7 @@
+id: bit
+name: Bit
+description: Either a 1 or a 0
+label:
+  single: bit
+  plural: bits
+  symbol: b

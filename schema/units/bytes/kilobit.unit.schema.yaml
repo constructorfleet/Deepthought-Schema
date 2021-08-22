@@ -1,0 +1,10 @@
+id: kilobit
+name: Kilobit
+description: 1000 Bits
+label:
+  single: kilobit
+  plural: kilobit
+  symbol: kb
+conversion:
+  unit: bit
+  conversion: 1000
