@@ -1,7 +1,6 @@
 id: acceleration
 name: Acceleration
 description: The rate of change in velocity over time
-type: float
 unit:
   unit1: meter
   unit2:

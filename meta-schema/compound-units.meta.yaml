@@ -1,29 +1,11 @@
 $schema: "https://json-schema.org/draft/07/schema"
-$id: "https://teagantotally.rocks/deepthought/meta/meta-datatype"
-title: Meta DataType schema validating meta-schema
+$id: "https://teagantotally.rocks/deepthought/meta/compoundunit"
+title: Compound Unit schema validating meta-schema
 
 type:
   - object
   - boolean
 definitions:
-  typeSchema:
-    type: string
-    enum:
-      - boolean
-      - string
-      - integer
-      - unsigned_integer
-      - short
-      - unsigned_short
-      - long
-      - unsigned_long
-      - float
-      - double
-  implicitPrecisionSchema:
-    type: number
-  explicitPrecisionSchema:
-    type: string
-    pattern: "^[0-9]*\.[0-9]* [a-z_]+$"
   simpleUnitSchema:
     type: string
     pattern: "[a-z][a-z_]+"
@@ -66,7 +48,7 @@ definitions:
       - $ref: "#/definitions/inverseUnitSchema"
       - $ref: "#/definitions/groupUnitSchema"
 properties:
-  type:
+  id:
     $ref: "#/definitions/typeSchema"
   name:
     type: string
@@ -76,16 +58,9 @@ properties:
     type: string
     minLength: 1
   unit:
-    $ref: "#/definitions/compountUnitSchema"
-  coerce:
-    type: boolean
-    default: true
-  precision:
-    oneOf:
-      - $ref: "#/definitions/implicitPrecisionSchema"
-      - $ref: "#/definitions/explicitPrecisionSchema"
+    $ref: "#/definitions/compoundUnitSchema"
 required:
-  - type
   - name
   - description
+  - unit
 default: true
