@@ -1,10 +1,10 @@
-id: foot
-name: Foot
-description: Imperial Unit for Length
+id: yard
+name: Yard
+description: 3 Feet
 label:
-  single: foot
-  plural: feet
-  symbol: ft
+  single: yard
+  plural: yards
+  symbol: yrd
 conversion:
-  unit: meter
-  conversion: 0.3048
+  unit: feet
+  conversion: 3

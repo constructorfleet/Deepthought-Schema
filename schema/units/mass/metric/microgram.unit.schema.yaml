@@ -1,5 +1,5 @@
-id: gram
-name: Gram
+id: microgram
+name: Microgram
 description: 1/1000th of a Kilogram
 label:
   single: gram
@@ -7,4 +7,4 @@ label:
   symbol: g
 conversion:
   unit: kilogram
-  conversion: 0.001
+  conversion: 0.000001

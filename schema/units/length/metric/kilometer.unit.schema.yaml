@@ -1,10 +1,10 @@
-id: millimeter
-name: Millimeter
-description: 1/1000th of a Meter
+id: kilometer
+name: Kilometer
+description: 1000 Meters
 label:
-  single: millimeter
-  plural: millimeters
-  symbol: mm
+  single: kilometer
+  plural: kilometers
+  symbol: km
 conversion:
   unit: meter
-  conversion: 0.001
+  conversion: 1000

@@ -1,7 +1,10 @@
-id: kilogram
-name: Kilogram
-description: SI Metric Unit for Mass
+id: gram
+name: Gram
+description: 1/1000th of a Kilogram
 label:
-  single: kilogram
-  plural: kilograms
-  symbol: kg
+  single: gram
+  plural: grams
+  symbol: g
+conversion:
+  unit: kilogram
+  conversion: 0.001

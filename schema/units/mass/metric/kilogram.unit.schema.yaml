@@ -1,7 +1,7 @@
-id: meter
-name: Meter
-description: SI Metric Unit for Length
+id: kilogram
+name: Kilogram
+description: SI Metric Unit for Mass
 label:
-  single: meter
-  plural: meters
-  symbol: m
+  single: kilogram
+  plural: kilograms
+  symbol: kg

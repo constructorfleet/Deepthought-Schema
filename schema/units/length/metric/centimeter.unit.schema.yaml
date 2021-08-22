@@ -1,10 +1,10 @@
-id: millimeter
-name: Millimeter
-description: 1/1000th of a Meter
+id: centimeter
+name: Centimeter
+description: 1/100th of a Meter
 label:
-  single: millimeter
-  plural: millimeters
-  symbol: mm
+  single: centimeter
+  plural: centimeters
+  symbol: cm
 conversion:
   unit: meter
-  conversion: 0.001
+  conversion: 0.01

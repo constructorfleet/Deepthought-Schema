@@ -1,7 +1,10 @@
-id: kilogram
-name: Kilogram
-description: SI Metric Unit for Mass
+id: pound
+name: Pound
+description: Imperial Unit for Mass
 label:
-  single: kilogram
-  plural: kilograms
-  symbol: kg
+  single: pound
+  plural: pounds
+  symbol: lb
+conversion:
+  unit: kilogram
+  conversion: 0.453592

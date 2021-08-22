@@ -1,10 +1,10 @@
-id: yard
-name: Yard
-description: 3 Feet
+id: mile
+name: Mile
+description: 5280 Feet
 label:
-  single: yard
-  plural: yards
-  symbol: yrd
+  single: mile
+  plural: miles
+  symbol: mi
 conversion:
   unit: feet
-  conversion: 3
+  conversion: 5280

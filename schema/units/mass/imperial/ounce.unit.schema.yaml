@@ -1,10 +1,10 @@
-id: pound
-name: Pound
-description: Imperial Unit for Mass
+id: ounce
+name: Ounce
+description: 1/1th of a Pound
 label:
-  single: pound
-  plural: pounds
-  symbol: lb
+  single: ounce
+  plural: ounces
+  symbol: oz
 conversion:
-  unit: kilogram
-  conversion: 0.453592
+  unit: pound
+  conversion: 0.0625
