@@ -1,0 +1,7 @@
+id: force
+name: Force
+description: The force applied
+symbol: N
+unit:
+  unit1: kilograms
+  unit2: acceleration
