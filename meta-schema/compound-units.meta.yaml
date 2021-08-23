@@ -12,20 +12,20 @@ definitions:
   productUnitSchema:
     type: object
     properties:
-      unit1:
+      unit:
         $ref: "#/definitions/compoundUnitSchema"
-      unit2:
+      multipliedBy:
         $ref: "#/definitions/compoundUnitSchema"
     required:
-      - unit1
-      - unit2
+      - unit
+      - multipliedBy
   inverseUnitShema:
     type: object
     properties:
-      inverseUnit:
+      inverse:
         $ref: "#/definitions/compoundUnitSchema"
     required:
-      - inverseUnit
+      - inverse
   exponentUnitSchema:
     type: object
     properties:
@@ -36,10 +36,10 @@ definitions:
   groupUnitSchema:
     type: object
     properties:
-      groupedUnits:
+      group:
         $ref: "#/definitions/compoundUnitSchema"
     required:
-      - groupedUnits
+      - group
   compoundUnitSchema:
     anyOf:
       - $ref: "#/definitions/simpleUnitSchema"

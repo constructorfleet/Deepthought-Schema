@@ -1,0 +1,109 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/attribute"
+title: Constraint schema validating meta-schema
+
+type:
+  - object
+  - boolean
+definitions:
+  stringSnakeCaseConstraintSchema:
+    pattern: "^(?:[a-z]_)+[a-z]$"
+  stringCamelCaseConstraintSchema:
+    pattern: "^[a-z]+(?:[A-Z][a-z]+)*$"
+  stringTitleCaseConstraintSchema:
+    pattern: "^[A-Z][a-z]+(?:[A-Z][a-z]+)*$"
+  stringGUIDConstraintSchema:
+    pattern: "[{]?[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}[}]?"
+  numericPrecisionConstraintSchema:
+    oneOf:
+      - type: number
+      - type: object
+        properties:
+          value:
+            type: number
+          unit:
+            type: string
+            minLength: 1
+            pattern: "^[a-z_]+$"
+  numericConstraintSchema:
+    anyOf:
+      - $ref: "https://json-schema.org/draft/07/schema#/definitions/maximum"
+      - $ref: "https://json-schema.org/draft/07/schema#/definitions/minimum"
+      - $ref: "https://json-schema.org/draft/07/schema#/definitions/exclusiveMaximum"
+      - $ref: "https://json-schema.org/draft/07/schema#/definitions/exclusiveMinimum"
+      - $ref: "#/definitions/numericPrecisionConstraintSchema"
+  stringConstraintSchema:
+    anyOf:
+      - $ref: "https://json-schema.org/draft/07/schema#/definitions/pattern"
+      - $ref: "https://json-schema.org/draft/07/schema#/definitions/maxLength"
+      - $ref: "https://json-schema.org/draft/07/schema#/definitions/minLength"
+      - $ref: "#/definitions/stringSnakeCaseConstraintSchema"
+      - $ref: "#/definitions/stringCamelCaseConstraintSchema"
+      - $ref: "#/definitions/stringTitleCaseConstraintSchema"
+      - $ref: "#/definitions/stringGUIDConstraintSchema"
+  ifStringConstraintSchema:
+    if:
+      properties:
+        dataType:
+          const: string
+    then:
+      properties:
+        constraints:
+          type: array
+          items:
+            $ref: "#/definitions/stringConstraintSchema"
+  ifNumberConstraintSchema:
+    if:
+      properties:
+        dataType:
+          anyOf:
+            - const: integer
+            - const: number
+      then:
+        properties:
+          constraints:
+            type: array
+            items:
+              $ref: "#/definitions/numericConstraintSchema"
+  ifArrayConstraintSchema:
+    if:
+      properties:
+        dataType:
+          anyOf:
+            - const: array
+      then:
+        properties:
+          items:
+            type: array
+            items:
+              allOf:
+                -
+              $ref: "#/definitions/numericConstraintSchema"
+
+properties:
+  id:
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+  dataType:
+    $ref: "https://json-schema.org/draft/07/schema#/definitions/simpleTypes"
+  name:
+    type: string
+    minLength: 1
+    pattern: "^[A-Z][a-zA-Z ]+$"
+  description:
+    type: string
+    minLength: 1
+  constraints:
+    type: array
+    minLength: 1
+    items: {
+
+    }
+required:
+  - id
+  - name
+  - description
+  - symbol
+  - unit
+default: true
