@@ -1,10 +1,12 @@
 id: acceleration
 name: Acceleration
 description: The rate of change in velocity over time
-symbol: m/s^2
+label:
+  single: meter per second^2
+  plural: meters per second^2
+  symbol: m/s^2
 unit:
-  unit1: meter
-  unit2:
-    inverseUnit:
-      unit: second
-      exponent: 2
+  unit: meter
+  dividedBy:
+    unit: second
+    exponent: 2

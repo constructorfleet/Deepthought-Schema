@@ -6,47 +6,78 @@ type:
   - object
   - boolean
 definitions:
-  simpleUnitSchema:
-    type: string
-    pattern: "[a-z][a-z_]+"
-  productUnitSchema:
+  anyOf:
+    $ref: "https://json-schema.org/draft/07/schema#/properties/anyOf"
+  oneOf:
+    $ref: "https://json-schema.org/draft/07/schema#/properties/oneOf"
+
+  labelSchema:
+    type: object
+    properties:
+      single:
+        type: string
+        minLength: 1
+      plural:
+        type: string
+        minLength: 1
+      symbol:
+        type: string
+        minLength: 1
+        pattern: "^(?:[a-zA-Z _\\-\\/]+(?:[\\^][0-9]+)?)+$"
+    required:
+      - single
+      - plural
+      - symbol
+
+  conversionSchema:
     type: object
     properties:
       unit:
-        $ref: "#/definitions/compoundUnitSchema"
-      multipliedBy:
-        $ref: "#/definitions/compoundUnitSchema"
+        type: string
+        minLength: 1
+        pattern: "^[a-z_]+$"
+      conversion:
+        type: number
+        format: float
     required:
       - unit
-      - multipliedBy
-  inverseUnitShema:
-    type: object
+      - conversion
+
+  unitIdentifierSchema:
+    type: string
+    pattern: "[a-z][a-z_]+"
+
+  exponentSchema:
     properties:
-      inverse:
-        $ref: "#/definitions/compoundUnitSchema"
-    required:
-      - inverse
-  exponentUnitSchema:
-    type: object
-    properties:
-      unit:
-        $ref: "#/definitions/compoundUnitSchema"
       exponent:
         type: number
-  groupUnitSchema:
-    type: object
+    required:
+      - exponent
+
+  unitGroupSchema:
     properties:
       group:
-        $ref: "#/definitions/compoundUnitSchema"
+        $ref: "#/definitions/unitSchema"
+      exponent:
+        type: number
     required:
       - group
-  compoundUnitSchema:
-    anyOf:
-      - $ref: "#/definitions/simpleUnitSchema"
-      - $ref: "#/definitions/productUnitSchema"
-      - $ref: "#/definitions/exponentUnitSchema"
-      - $ref: "#/definitions/inverseUnitShema"
-      - $ref: "#/definitions/groupUnitSchema"
+  unitSchema:
+    properties:
+      unit:
+        $ref: "#/definitions/unitIdentifierSchema"
+      exponent:
+        type: number
+      multipliedBy:
+        oneOf:
+          - $ref: "#/definitions/unitSchema"
+          - $ref: "#/definitions/unitGroupSchema"
+      dividedBy:
+        oneOf:
+          - $ref: "#/definitions/unitSchema"
+          - $ref: "#/definitions/unitGroupSchema"
+    required:
+      - unit
 properties:
   id:
     type: string
@@ -59,16 +90,19 @@ properties:
   description:
     type: string
     minLength: 1
-  symbol:
-    type: string
-    minLength: 1
-    pattern: "^(?:[a-zA-Z _\-\/]+(?:[\^][0-9]+)?)+$"
+  label:
+    $ref: "#/definitions/labelSchema"
+  conversion:
+    $ref: "#/definitions/conversionSchema"
   unit:
-    $ref: "#/definitions/compoundUnitSchema"
+    oneOf:
+      - $ref: "#/definitions/unitIdentifierSchema"
+      - $ref: "#/definitions/unitSchema"
+      - $ref: "#/definitions/unitGroupSchema"
 required:
   - id
   - name
   - description
-  - symbol
+  - label
   - unit
 default: true

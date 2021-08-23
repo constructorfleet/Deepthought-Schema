@@ -1,9 +1,11 @@
 id: kilobitspersecond
 name: Kilobits per second
 description: The number of kilobit transmitted per second
-symbol: kbps
+label:
+  single: kilobit per second
+  plural: kilobits per second
+  symbol: kbps
 unit:
-  unit1: kilobit
-  unit2:
-    inverseUnit:
-      unit: second
+  unit: kilobit
+  dividedBy:
+    unit: second

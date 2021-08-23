@@ -1,9 +1,11 @@
 id: megabytespersecond
 name: Megabytes per second
 description: The number of milobytes transmitted per second
-symbol: mBps
+label:
+  single: megabyte per second
+  plural: megabytes per second
+  symbol: mBps
 unit:
-  unit1: megabyte
-  unit2:
-    inverseUnit:
-      unit: second
+  unit: megabyte
+  dividedBy:
+    unit: second

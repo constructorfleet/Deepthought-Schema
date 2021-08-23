@@ -1,9 +1,11 @@
 id: velocity
 name: Velocity
 description: The rate of change in postion over time
-symbol: m/s
+label:
+  single: meter per second
+  plural: meters per second
+  symbol: m/s
 unit:
-  unit1: meter
-  unit2:
-    inverseUnit:
-      unit: second
+  unit: meter
+  dividedBy:
+    unit: second

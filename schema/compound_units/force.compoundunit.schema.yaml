@@ -1,7 +1,11 @@
 id: force
 name: Force
 description: The force applied
-symbol: N
+label:
+  single: newton
+  plural: newtons
+  symbol: N
 unit:
-  unit1: kilograms
-  unit2: acceleration
+  unit: kilogram
+  multipliedBy:
+    unit: acceleration

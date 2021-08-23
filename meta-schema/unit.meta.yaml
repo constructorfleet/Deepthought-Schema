@@ -12,11 +12,9 @@ definitions:
       single:
         type: string
         minLength: 1
-        pattern: "^[a-z _-]+$"
       plural:
         type: string
         minLength: 1
-        pattern: "^[a-z _-]+$"
       symbol:
         type: string
         minLength: 1
