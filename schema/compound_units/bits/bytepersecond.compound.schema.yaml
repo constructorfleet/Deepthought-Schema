@@ -1,9 +1,9 @@
 id: bytespersecond
 name: Bytes per second
-description: The number of bytes transmitted per second
+description: The number of bits transmitted per second
 label:
   single: byte per second
-  plural: bytes per second
+  plural: bits per second
   symbol: Bps
 unit:
   unit: byte
