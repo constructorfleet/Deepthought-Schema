@@ -19,7 +19,6 @@ definitions:
         type: string
         minLength: 1
         maxLength: 4
-        pattern: "^[a-zA-Z _-]{1,4}$"
     required:
       - single
       - plural

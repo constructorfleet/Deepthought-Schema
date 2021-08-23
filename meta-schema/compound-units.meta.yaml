@@ -23,7 +23,6 @@ definitions:
       symbol:
         type: string
         minLength: 1
-        pattern: "^(?:[a-zA-Z _\\-\\/]+(?:[\\^][0-9]+)?)+$"
     required:
       - single
       - plural

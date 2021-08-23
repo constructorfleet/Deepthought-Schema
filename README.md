@@ -75,16 +75,16 @@ information:
 
 ```yaml
 # units.yml
-fathom:
-  name: Fathoms
-  description: A length measure usually referring to a depth.
-  label:
-    single: fathom
-    plural: fathoms
-    symbol: fm
-  conversion:
-    unit: meter
-    factor: 1.8288
+id: fathom
+name: Fathom
+description: A length measure usually referring to a depth.
+label:
+  single: Fathom
+  plural: Fathoms
+  symbol: fm
+conversion:
+  unit: meter
+  factor: 1.8288
 ```
 
 While any unit can be specified in the conversion attribute, specifying the conversion factor in relation to 
@@ -95,24 +95,48 @@ To specify an entirely new dimensional unit, simply omit the conversion attribut
 
 ```yaml
 # units.yml
-click:
-  name: Clicks
-  description: The click count of something.
-  label:
-    single: Click
-    plural: Clicks
-    symbol: clicks
+id: click
+name: Click
+description: The click count of something.
+label:
+  single: Click
+  plural: Clicks
+  symbol: clicks
 
-slam:  # This may be meaningful to someone...
-  name: Slams
-  description: Count of something clicked being broken.
-  label:
+id: slam  # This may be meaningful to someone...
+name: Slams
+description: Count of something clicked being broken.
+label:
     single: Slam
     plural: Slams
     symbol: slams
-  conversion:
+conversion:
     unit: click
     factor: .001  # If clicked 1000 times, must be broken
+```
+
+DeepThought also supports defining multi-dimensional units, or compound units, even complex units.
+
+For example, the units for the (Gravitational Constant)[https://en.wikipedia.org/wiki/Gravitational_constant] are
+`m^3/(kg*s^2)`, to define this in DeepThought would look like this:
+
+```yaml
+id: gravitational_constant
+name: Gravitational Constant Units
+description: The units for G, the gravitational constant
+label:
+  single: meter^3 per (kilogram * second^2)
+  plural: meters^3 per (kilogram * second^2)
+  symbol: m^3/(kg*s^2)
+unit:
+  unit: meter
+  exponent: 3
+  dividedBy:
+    group:
+      unit: kilogram
+      multipliedBy:
+        unit: second
+        exponent: 2
 ```
 
 #### Built-in Units
