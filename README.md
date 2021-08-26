@@ -35,7 +35,9 @@ height:
   constraints:
     - minimum: 0
     - maximum: 8
-    - precision: 1 inch
+    - precision: 
+        value: 1
+        unit: inch
 ```
 
 Or, for the rest of the world:
