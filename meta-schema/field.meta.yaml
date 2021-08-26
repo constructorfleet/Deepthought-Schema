@@ -227,6 +227,10 @@ properties:
   description:
     type: string
     minLength: 1
+  examples:
+    type: array
+    items:
+      $ref: "#"
   unit:
     type: string
     minLength: 1
