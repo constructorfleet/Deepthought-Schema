@@ -135,6 +135,12 @@ definitions:
       - $ref: "#/definitions/numericPrecisionConstraintSchema"
       - $ref: "#/definitions/isNullableSchema"
 
+  arrayConstraintSchema:
+    oneOf:
+      - $ref: "#/definitions/maxLengthSchema"
+      - $ref: "#/definitions/minLengthSchema"
+      - $ref: "#/definitions/isNullableSchema"
+
 properties:
   id:
     type: string
@@ -154,10 +160,7 @@ properties:
     minLength: 1
     pattern: "^[a-z_]+$"
 required:
-  - id
   - dataType
-  - name
-  - description
 
 allOf:
   - if:
@@ -186,3 +189,27 @@ allOf:
             - type: array
               items:
                 $ref: "#/definitions/stringConstraintSchema"
+  - if:
+      properties:
+        dataType:
+          const: array
+    then:
+      properties:
+        constraints:
+          oneOf:
+            - $ref: "#/definitions/arrayConstraintSchema"
+            - type: array
+              items:
+                $ref: "#/definitions/arrayConstraintSchema"
+        items:
+          oneOf:
+            - $ref: "#"
+              required:
+                - dataType
+            - type: array
+              items:
+                $ref: "#"
+                required:
+                  - dataType
+      required:
+        - items
