@@ -151,28 +151,36 @@ Assume, you had a use case for calculating the volumetric density of a can of Pr
 
 ```yaml
 # pringles.fields.yml
-radius:
-  type: float
+- id: radius
+  type: number
   name: Radius
   description: Distance from edge to center of a Pringles can
   unit: centimeter
   coerce: True
-height:
+  constraints:
+    - minimum: 0
+    - maximum:
+        value: 1
+        unit: meter
+- id: height
   type: float
   name: Height
   description: Distance from bottom to top of a Pringles can
   unit: inches
   coerce: True
-mass:
-  type: float
+  constraints:
+    - exclusiveMinimum: 0
+- id: mass
+  type: number
   name: Mass
   description: The amount of matter contained in a Pringles can
   unit: grams
   coerce: True
-density:
+- id: density
+  type: number
   name: Pringles Can Density 
   description: The mean density of the a Pringles can
-  unit: kilogram / (meter ^ 3)
+  unit: si_density
       
 # pringles.models.yml
 pringles_can_dimensions:

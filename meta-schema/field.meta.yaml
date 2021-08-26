@@ -235,6 +235,9 @@ properties:
     type: string
     minLength: 1
     pattern: "^[a-z_]+$"
+  coerce:
+    type: boolean
+    default: true
 required:
   - id
   - name
