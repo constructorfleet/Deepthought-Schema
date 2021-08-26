@@ -6,11 +6,6 @@ type:
   - object
   - boolean
 definitions:
-  anyOf:
-    $ref: "https://json-schema.org/draft/07/schema#/properties/anyOf"
-  oneOf:
-    $ref: "https://json-schema.org/draft/07/schema#/properties/oneOf"
-
   labelSchema:
     type: object
     properties:
