@@ -1,0 +1,12 @@
+id: pressure
+name: Pressure
+description: The force applied per square meter
+label:
+  single: pascal
+  plural: pascals
+  symbol: Pa
+unit:
+  unit: newton
+  dividedBy:
+    unit: meter
+    exponent: 2
