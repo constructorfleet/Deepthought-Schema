@@ -120,29 +120,55 @@ conversion:
 
 DeepThought also supports defining multi-dimensional units, or compound units, even complex units.
 
-For example, the units for the (Gravitational Constant)[https://en.wikipedia.org/wiki/Gravitational_constant] are
-`m^3/(kg*s^2)`, to define this in DeepThought would look like this:
-
+For example, velocity is distance over time, acceleration is the change in velocity over time:
 ```yaml
-id: gravitational_constant
-name: Gravitational Constant Units
-description: The units for G, the gravitational constant
+id: velocity
+name: Velocity
+description: The change in physical position per unit time.
 label:
-  single: meter^3 per (kilogram * second^2)
-  plural: meters^3 per (kilogram * second^2)
-  symbol: m^3/(kg*s^2)
+  single: meter per second
+  plural: meters per second
+  symbom: m/s
 unit:
   unit: meter
-  exponent: 3
   dividedBy:
-    group:
-      unit: kilogram
-      multipliedBy:
-        unit: second
-        exponent: 2
+    unit: second
+```
+
+```yaml
+id: acceleration
+name: Acceleration
+description: The rate of change in velocity per unit time.
+label:
+  single: meter per second^2
+  plural: meters per second^2
+  symbol: m/s^2
+unit:
+  unit: meter
+  dividedBy:
+    unit: second
+    exponent: 2
 ```
 
 #### Built-in Units
+
+* bps, Bps, kbps, kBps, mbps, mBps  
+* bit, byte, kilobit, kilobyte, megabit, megabyte, gigabyte  
+* ampere  
+* Couloumb, joule  
+* acceleration, velocity, force, presssure  
+* foot, inch, mile, yard  
+* centimeter, millimeter, meter, kilometer  
+* ounce, pound, gram, kilogram, microgram  
+* second, minute, hour  
+* hertz  
+
+#### Built-in Constants
+
+* Elementary Charge  
+* Gravitational Constant  
+* Lightspeed  
+* Planck  
 
 ### Models
 
