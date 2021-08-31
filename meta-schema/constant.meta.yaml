@@ -20,31 +20,19 @@ definitions:
         then:
           properties:
             value:
-              oneOf:
-                - const: true
-                - const: false
+              enum:
+                - true
+                - false
           required:
             - value
       - if:
           properties:
             dataType:
-              const: integer
+              anyOf:
+                - const: integer
+                - const: number
         then:
-          properties:
-            value:
-              type: integer
-          required:
-            - value
-      - if:
-          properties:
-            dataType:
-              const: number
-        then:
-          properties:
-            value:
-              type: number
-          required:
-            - value
+          $ref: "field.meta.yaml#/definitions/valueExpressionSchema"
       - if:
           properties:
             dataType:

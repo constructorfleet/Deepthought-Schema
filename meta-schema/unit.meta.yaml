@@ -38,8 +38,12 @@ definitions:
       - conversion
 
   unitIdentifierSchema:
-    type: string
-    pattern: "[a-z][a-z_]+"
+    properties:
+      unit:
+        type: string
+        pattern: "[a-z][a-z_]+"
+    required:
+      - unit
 
   exponentSchema:
     properties:
@@ -59,7 +63,9 @@ definitions:
   unitSchema:
     properties:
       unit:
-        $ref: "#/definitions/unitIdentifierSchema"
+        oneOf:
+          - $ref: "#/definitions/unitSchema"
+          - $ref: "#/definitions/unitIdentifierSchema"
       exponent:
         type: number
       multipliedBy:
