@@ -1,0 +1,10 @@
+id: planck
+name: Planck's Constant
+description: Relates a photon's energy to it's frequency, as well as relating mass to frequency.
+dataType: number
+unit:
+  unit: joule
+  dividedBy:
+    unit: hertz
+value: 6.62607015e-34
+symbol: h

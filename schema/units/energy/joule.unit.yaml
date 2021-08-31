@@ -1,0 +1,7 @@
+id: joule
+name: Joule
+description: SI unit for a unit of energy.
+label:
+  plural: joules
+  single: joule
+  symbol: J

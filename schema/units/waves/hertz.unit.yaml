@@ -1,0 +1,7 @@
+id: hertz
+name: Hertz
+description: Derived unit of frequency in SI units, defined as 1 cycle per second.
+label:
+  plural: hertz
+  single: hertz
+  symbol: Hz
