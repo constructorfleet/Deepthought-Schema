@@ -248,9 +248,6 @@ definitions:
         type: boolean
         default: true
     required:
-      - id
-      - name
-      - description
       - dataType
     allOf:
       - $ref: "#/definitions/constraintsSchema"
@@ -265,4 +262,8 @@ allOf:
         type: array
         items:
           $ref: "#/definitions/fieldSchema"
+    required:
+      - id
+      - name
+      - description
   - $ref: "#/definitions/fieldSchema"
