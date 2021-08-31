@@ -1,0 +1,18 @@
+id: gravitational_constant
+name: The Newtonian constant of Gravitation
+dataType: number
+description: Represents the constant proportionality connecting the gravitational force between to bodies.
+label:
+  single: meter^3 per (kilogram * second^2)
+  plural: meters^3 per (kilogram * second^2)
+  symbol: m^3/(kg*s^2)
+unit:
+  unit: meter
+  exponent: 3
+  dividedBy:
+    group:
+      unit: kilogram
+      multipliedBy:
+        unit: second
+        exponent: 2
+value: 6.67430e-11
