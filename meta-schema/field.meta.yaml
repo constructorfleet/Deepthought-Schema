@@ -145,15 +145,31 @@ definitions:
             dataType:
               anyOf:
                 - const: integer
-                - const: number
         then:
           properties:
+            value:
+              type: integer
             constraints:
               oneOf:
                 - $ref: "#/definitions/numericConstraintSchema"
                 - type: array
                   items:
                     $ref: "#/definitions/numericConstraintSchema"
+      - if:
+          properties:
+            dataType:
+              anyOf:
+                - const: number
+          then:
+            properties:
+              value:
+                type: number
+              constraints:
+                oneOf:
+                  - $ref: "#/definitions/numericConstraintSchema"
+                  - type: array
+                    items:
+                      $ref: "#/definitions/numericConstraintSchema"
       - if:
           properties:
             dataType:
@@ -209,40 +225,44 @@ definitions:
     allOf:
       - $ref: "#/definitions/constraintsSchema"
 
+  fieldSchema:
+    properties:
+      id:
+        type: string
+        minLength: 1
+        pattern: "^[a-z][a-z_]+[a-z]$"
+      dataType:
+        $ref: "#/definitions/fieldTypes"
+      name:
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        type: string
+        minLength: 1
+      unit:
+        type: string
+        minLength: 1
+        pattern: "^[a-z_]+$"
+      coerce:
+        type: boolean
+        default: true
+    required:
+      - id
+      - name
+      - description
+      - dataType
+    allOf:
+      - $ref: "#/definitions/constraintsSchema"
+
 type:
   - object
   - boolean
 
-properties:
-  id:
-    type: string
-    minLength: 1
-    pattern: "^[a-z][a-z_]+[a-z]$"
-  dataType:
-    $ref: "#/definitions/fieldTypes"
-  name:
-    type: string
-    minLength: 1
-    pattern: "^[A-Z][a-zA-Z ]+$"
-  description:
-    type: string
-    minLength: 1
-  examples:
-    type: array
-    items:
-      $ref: "#"
-  unit:
-    type: string
-    minLength: 1
-    pattern: "^[a-z_]+$"
-  coerce:
-    type: boolean
-    default: true
-required:
-  - id
-  - name
-  - description
-  - dataType
-
 allOf:
-  - $ref: "#/definitions/constraintsSchema"
+  - properties:
+      examples:
+        type: array
+        items:
+          $ref: "#/definitions/fieldSchema"
+  - $ref: "#/definitions/fieldSchema"
