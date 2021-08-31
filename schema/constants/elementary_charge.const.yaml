@@ -1,0 +1,7 @@
+id: elementary_charge
+name: Elementary Charge
+description: The electrical charage carried by a proton
+dataType: number
+symbol: e
+unit: couloumb
+value: 1.602176634e-19

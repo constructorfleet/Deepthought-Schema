@@ -1,0 +1,10 @@
+id: ampere
+name: Ampere
+description: Unit measuring the flow of electrical charge in a circuit, rate of 1 Coulomb of charge flowing per second.
+label:
+  single: amp
+  plural: amps
+  symbol: A
+conversion:
+  unit: coulomb
+  conversion: 1.0

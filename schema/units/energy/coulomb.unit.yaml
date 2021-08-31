@@ -1,0 +1,7 @@
+id: coulomb
+name: Coulomb
+description: The standard unit for measuring electrical charage.
+label:
+  single: coulomb
+  plural: coulombs
+  symbol: C
