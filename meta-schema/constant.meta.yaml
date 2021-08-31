@@ -103,3 +103,4 @@ required:
 type:
   - object
   - boolean
+default: true
