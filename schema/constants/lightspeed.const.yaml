@@ -1,0 +1,10 @@
+id: gravitational_constant
+name: The Newtonian constant of Gravitation
+dataType: integer
+description: Represents the constant proportionality connecting the gravitational force between to bodies.
+label:
+  single: kilometer per second
+  plural: kilometers per second
+  symbol: c
+unit: velocity
+value: 1080000000
