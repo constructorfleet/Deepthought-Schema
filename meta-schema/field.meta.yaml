@@ -10,7 +10,13 @@ definitions:
       - integer
       - number
       - string
-
+  isImmutableSchema:
+    properties:
+      immutable:
+        type: boolean
+        default: false
+    required:
+      - immutable
   isNullableSchema:
     properties:
       nullable:
@@ -74,6 +80,7 @@ definitions:
       - $ref: "#/definitions/stringCaseConstraintSchema"
       - $ref: "#/definitions/stringFormatConstraintSchema"
       - $ref: "#/definitions/isNullableSchema"
+      - $ref: "#/definitions/isImmutableSchema"
 
   valueExpressionSchema:
     oneOf:
@@ -131,12 +138,14 @@ definitions:
       - $ref: "#/definitions/exclusiveMinimumSchema"
       - $ref: "#/definitions/numericPrecisionConstraintSchema"
       - $ref: "#/definitions/isNullableSchema"
+      - $ref: "#/definitions/isImmutableSchema"
 
   arrayConstraintSchema:
     oneOf:
       - $ref: "#/definitions/maxLengthSchema"
       - $ref: "#/definitions/minLengthSchema"
       - $ref: "#/definitions/isNullableSchema"
+      - $ref: "#/definitions/isImmutableSchema"
 
   constraintsSchema:
     allOf:
