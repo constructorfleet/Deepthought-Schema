@@ -18,11 +18,11 @@ definitions:
       symbol:
         type: string
         minLength: 1
-        maxLength: 4
     required:
       - single
       - plural
       - symbol
+
   conversionSchema:
     type: object
     properties:
@@ -36,6 +36,42 @@ definitions:
     required:
       - unit
       - conversion
+
+  unitIdentifierSchema:
+    type: string
+    pattern: "[a-z][a-z_]+"
+
+  exponentSchema:
+    properties:
+      exponent:
+        type: number
+    required:
+      - exponent
+
+  unitGroupSchema:
+    properties:
+      group:
+        $ref: "#/definitions/unitSchema"
+      exponent:
+        type: number
+    required:
+      - group
+  unitSchema:
+    properties:
+      unit:
+        $ref: "#/definitions/unitIdentifierSchema"
+      exponent:
+        type: number
+      multipliedBy:
+        oneOf:
+          - $ref: "#/definitions/unitSchema"
+          - $ref: "#/definitions/unitGroupSchema"
+      dividedBy:
+        oneOf:
+          - $ref: "#/definitions/unitSchema"
+          - $ref: "#/definitions/unitGroupSchema"
+    required:
+      - unit
 properties:
   id:
     type: string
@@ -52,6 +88,11 @@ properties:
     $ref: "#/definitions/labelSchema"
   conversion:
     $ref: "#/definitions/conversionSchema"
+  unit:
+    oneOf:
+      - $ref: "#/definitions/unitIdentifierSchema"
+      - $ref: "#/definitions/unitSchema"
+      - $ref: "#/definitions/unitGroupSchema"
 required:
   - id
   - name
