@@ -26,33 +26,33 @@ Traditionally, this would be a field of type `int` - if you're lucky or forward 
 With DeepThought, this field could be specified as:
 ```yaml
 # person.fields.yml
-height:
-  type: float
-  name: Height
-  description: How tall the person is
-  unit: foot
-  coerce: True
-  constraints:
-    - minimum: 0
-    - maximum: 8
-    - precision: 
-        value: 1
-        unit: inch
+id: height
+type: number
+name: Height
+description: How tall the person is
+unit: foot
+coerce: True
+constraints:
+- minimum: 0
+- maximum: 8
+- precision: 
+    value: 1
+    unit: inch
 ```
 
 Or, for the rest of the world:
 ```yaml
 # person.fields.yml
-height:
-  type: float
-  name: Height
-  description: How tall the person is
-  unit: meter
-  coerce: True
-  constraints:
-    - minimum: 0
-    - maximum: 3
-    - precision: 0.01
+id:
+type: number
+name: Height
+description: How tall the person is
+unit: meter
+coerce: True
+constraints:
+- minimum: 0
+- maximum: 3
+- precision: 0.01
 ```
 
 You tell DeepThought the unit to present to the Domain-Interfacing Use Case.
@@ -104,7 +104,8 @@ label:
   single: Click
   plural: Clicks
   symbol: clicks
-
+```
+```yaml
 id: slam  # This may be meaningful to someone...
 name: Slams
 description: Count of something clicked being broken.
