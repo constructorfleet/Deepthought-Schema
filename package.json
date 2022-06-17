@@ -4,12 +4,16 @@
   "description": "Deepthought Schema Specification",
   "main": "index.js",
   "scripts": {
+    "start": "nest start",
+    "start:dev": "nest start --watch",
+    "start:debug": "nest start --debug --watch",
     "test": "echo \"Error: no test specified\" && exit 1",
     "lint": "eslint ./src --ext .ts",
     "clean": "rimraf ./dist",
-    "compile": "tsc --build --verbose",
-    "build": "$npm_execpath run clean && $npm_execpath run build:compile",
-    "build:compile": "$npm_execpath run compile"
+    "compile": "nest build --tsc",
+    "build": "$npm_execpath run clean && $npm_execpath run build:compile && $npm_execpath run build:assets",
+    "build:compile": "$npm_execpath run compile",
+    "build:assets": "copyfiles ./assets/* ./dist/"
   },
   "repository": {
     "type": "git",
@@ -49,6 +53,7 @@
     "@types/node": "^18.0.0",
     "@typescript-eslint/eslint-plugin": "^5.28.0",
     "@typescript-eslint/parser": "^5.28.0",
+    "copyfiles": "^2.4.1",
     "eslint": "^8.17.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
@@ -65,10 +70,12 @@
     "@nestjs/config": "^2.1.0",
     "@nestjs/core": "^8.4.7",
     "@nestjs/graphql": "^10.0.16",
+    "@nestjs/platform-express": "^8.4.7",
     "graphql": "^16.5.0",
     "graphql-constraint-directive": "^3.1.1",
     "js-yaml": "^4.1.0",
     "reflect-metadata": "^0.1.13",
-    "rxjs": "^7.2.0"
+    "rxjs": "^7.2.0",
+    "source-map-support": "^0.5.21"
   }
 }
