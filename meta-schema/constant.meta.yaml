@@ -13,6 +13,10 @@ definitions:
       - string
 
   valueSchema:
+    type: object
+    properties:
+      dataType:
+        $ref: "#/definitions/fieldTypes"
     allOf:
       - if:
           properties:
@@ -58,6 +62,7 @@ definitions:
             - value
 
   constantSchema:
+    type: object
     allOf:
       - $ref: "#/definitions/valueSchema"
       - properties:

@@ -1,0 +1,74 @@
+{
+  "name": "deepthought-schema",
+  "version": "1.0.0",
+  "description": "Deepthought Schema Specification",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "eslint ./src --ext .ts",
+    "clean": "rimraf ./dist",
+    "compile": "tsc --build --verbose",
+    "build": "$npm_execpath run clean && $npm_execpath run build:compile",
+    "build:compile": "$npm_execpath run compile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/constructorfleet/Deepthought-Schema.git"
+  },
+  "author": "Teagan Glenn (that@teagantotally.rocks)",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/constructorfleet/Deepthought-Schema/issues"
+  },
+  "homepage": "https://github.com/constructorfleet/Deepthought-Schema#readme",
+  "eslintConfig": {
+    "env": {
+      "browser": false,
+      "es2021": true
+    },
+    "extends": [
+      "airbnb-base",
+      "plugin:import/typescript"
+    ],
+    "parser": "@typescript-eslint/parser",
+    "parserOptions": {
+      "ecmaVersion": "latest",
+      "sourceType": "module"
+    },
+    "plugins": [
+      "@typescript-eslint",
+      "plugin:import/typescript"
+    ],
+    "rules": {
+      "import/extensions": 0
+    }
+  },
+  "devDependencies": {
+    "@tsconfig/node14": "^1.0.3",
+    "@types/js-yaml": "^4.0.5",
+    "@types/node": "^18.0.0",
+    "@typescript-eslint/eslint-plugin": "^5.28.0",
+    "@typescript-eslint/parser": "^5.28.0",
+    "eslint": "^8.17.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.26.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^4.7.3"
+  },
+  "dependencies": {
+    "@graphql-tools/graphql-file-loader": "^7.3.15",
+    "@graphql-tools/load": "^7.5.14",
+    "@graphql-tools/load-files": "^6.5.4",
+    "@graphql-tools/schema": "^8.3.14",
+    "@nestjs/apollo": "^10.0.16",
+    "@nestjs/common": "^8.2.3",
+    "@nestjs/config": "^2.1.0",
+    "@nestjs/core": "^8.4.7",
+    "@nestjs/graphql": "^10.0.16",
+    "graphql": "^16.5.0",
+    "graphql-constraint-directive": "^3.1.1",
+    "js-yaml": "^4.1.0",
+    "reflect-metadata": "^0.1.13",
+    "rxjs": "^7.2.0"
+  }
+}
