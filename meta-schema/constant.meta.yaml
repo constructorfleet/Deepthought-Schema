@@ -4,6 +4,7 @@ title: Constant schema validating meta-schema
 
 definitions:
   fieldTypes:
+    type: string
     enum:
       - array
       - boolean
@@ -96,7 +97,7 @@ properties:
       $ref: "#/definitions/constantSchema"
 
 allOf:
-  - $ref: "#/definitions/constantSchema'
+  - $ref: "#/definitions/constantSchema"
 
 required:
   - dataType
@@ -105,7 +106,5 @@ required:
   - value
   - symbol
 
-type:
-  - object
-  - boolean
+type: object
 default: true

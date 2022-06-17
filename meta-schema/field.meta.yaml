@@ -60,7 +60,7 @@ definitions:
     properties:
       minLength:
         type: integer
-        minmum: 0
+        minimum: 0
     required:
       - minLength
   maxLengthSchema:
