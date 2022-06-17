@@ -13,9 +13,6 @@ export const YAML_CONFIG_FILENAME = join(
   'config.yaml',
 );
 
-console.log(ASSET_DIRECTORY);
-console.log(YAML_CONFIG_FILENAME);
-
 export interface DeepthoughtConfiguration extends ConfigObject {
   schema: {
     directory: string,
