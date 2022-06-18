@@ -1,15 +1,14 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { GraphQLModule } from '@nestjs/graphql';
+import { ApolloDriver, ApolloDriverAsyncConfig } from '@nestjs/apollo';
 import { AppService } from './app.service';
 
 import { readFileSync } from 'fs';
 import * as yaml from 'js-yaml';
-import { join } from 'path';
-import { LoggerModule } from './logging/log.module';
+import { LoggerModule } from '../logging/log.module';
 import { DeepthoughtConfiguration, YAML_CONFIG_FILENAME } from './config';
-import { SchemaService } from './schema/schema.service';
-
-
+import { SchemaService } from '../schema/schema.service';
 
 const configuration = () => {
   return yaml.load(
@@ -24,6 +23,9 @@ const configuration = () => {
       isGlobal: true,
       load: [configuration],
     }),
+    GraphQLModule.forRootAsync<ApolloDriverAsyncConfig>({
+      driver: ApolloDriver,
+    })
   ],
   providers: [
     AppService,

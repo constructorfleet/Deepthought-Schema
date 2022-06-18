@@ -1,12 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { ContextService } from './framework/context.service';
+import { LoggingContextService } from '../logging/context/loggingContextService';
 import { Reflector } from '@nestjs/core';
-import { LoggerService } from './logging/log.service';
-import { WithContext } from './framework/context.decorator';
+import { LoggerService } from '../logging/log.service';
+import { WithLoggingContext } from '../logging/context/loggingcontext.decorator';
 
 @Injectable()
-@WithContext("ApplicationService")
-export class AppService extends ContextService {
+@WithLoggingContext("ApplicationService")
+export class AppService extends LoggingContextService {
   constructor(
     reflector: Reflector,
     logger: LoggerService,

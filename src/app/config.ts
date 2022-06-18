@@ -14,7 +14,13 @@ export const YAML_CONFIG_FILENAME = join(
 );
 
 export interface DeepthoughtConfiguration extends ConfigObject {
-  schema: {
-    directory: string,
+  graphql: {
+    typeDirectory: string;
+
+  };
+  apollo: {
+    driver: "federated" | "base";
+    enablePlayground: boolean;
+    debugMode: boolean;
   };
 }
