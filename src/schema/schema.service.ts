@@ -31,7 +31,7 @@ export class SchemaService extends LoggingContextService {
       logger,
     );
     this.schemaDirectory = configService.getOrThrow<string>(
-      'schema.directory',
+      'graphql.typeDirectory',
       {
         infer: true
       }

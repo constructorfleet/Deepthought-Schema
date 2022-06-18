@@ -5,7 +5,13 @@ import {
   ExtractSubjectType,
   InferSubjects
 } from '@casl/ability';
-import { ExecutionContext, Injectable, SetMetadata, UseGuards } from '@nestjs/common';
+import {
+  applyDecorators,
+  ExecutionContext,
+  Injectable,
+  SetMetadata,
+  UseGuards
+} from '@nestjs/common';
 import { GuardCallback, GuardService } from '../../app/guards/guard';
 import { WithLoggingContext } from '../../logging/context/loggingcontext.decorator';
 import { LoggingContextService } from '../../logging/context/loggingContextService';
@@ -47,10 +53,13 @@ export interface Scope {
 export const REQUIRES_SCOPE_METADATA_KEY = 'RequiresScope';
 
 export const RequiresScopes = (...scopes: Scope[]) =>
-  SetMetadata(REQUIRES_SCOPE_METADATA_KEY, scopes.map(
-    (scope) =>
-      (ability: ScopeAbility) => ability.can(scope.action, scope.subject),
-  ))(UseGuards(ScopeGuardService));
+  applyDecorators(
+    SetMetadata(REQUIRES_SCOPE_METADATA_KEY, scopes.map(
+      (scope) =>
+        (ability: ScopeAbility) => ability.can(scope.action, scope.subject),
+    )),
+    UseGuards(ScopeGuardService),
+  );
 
 @Injectable()
 export class ScopeGuardService extends GuardService<ScopeAbility, boolean> {

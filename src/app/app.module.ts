@@ -9,6 +9,7 @@ import * as yaml from 'js-yaml';
 import { LoggerModule } from '../logging/log.module';
 import { DeepthoughtConfiguration, YAML_CONFIG_FILENAME } from './config';
 import { SchemaService } from '../schema/schema.service';
+import { SchemaModule } from '../schema/schema.module';
 
 const configuration = () => {
   return yaml.load(
@@ -23,13 +24,15 @@ const configuration = () => {
       isGlobal: true,
       load: [configuration],
     }),
-    GraphQLModule.forRootAsync<ApolloDriverAsyncConfig>({
-      driver: ApolloDriver,
-    })
+    SchemaModule,
   ],
   providers: [
     AppService,
-    SchemaService,
+  ],
+  exports: [
+    LoggerModule,
+    ConfigModule,
+    SchemaModule
   ],
 })
 export class AppModule {

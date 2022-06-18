@@ -72,6 +72,8 @@
     "@nestjs/core": "^8.4.7",
     "@nestjs/graphql": "^10.0.16",
     "@nestjs/platform-express": "^8.4.7",
+    "apollo-server-core": "^3.9.0",
+    "apollo-server-express": "^3.9.0",
     "graphql": "^16.5.0",
     "graphql-constraint-directive": "^3.1.1",
     "js-yaml": "^4.1.0",

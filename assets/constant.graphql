@@ -1,0 +1,24 @@
+type Constant {
+  id: String
+  examples: [ConstantExamples!]
+}
+
+type ConstantExamples {
+  _typesWithoutFieldsAreNotAllowed_: String
+}
+
+type DefinitionConstantSchema {
+  _typesWithoutFieldsAreNotAllowed_: String
+}
+
+type DefinitionValueSchema {
+  _typesWithoutFieldsAreNotAllowed_: String
+}
+
+type QueriesHolder {
+  x: Constant
+}
+
+schema {
+  query: QueriesHolder
+}

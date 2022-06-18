@@ -16,7 +16,6 @@ export const YAML_CONFIG_FILENAME = join(
 export interface DeepthoughtConfiguration extends ConfigObject {
   graphql: {
     typeDirectory: string;
-
   };
   apollo: {
     driver: "federated" | "base";

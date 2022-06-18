@@ -9,7 +9,7 @@ async function bootstrap() {
   const logger = await app.resolve(LoggerService);
   const configService = await app.resolve(ConfigService<DeepthoughtConfiguration>);
   logger.error(configService.getOrThrow<string>(
-      'schema.directory',
+      'graphql.typeDirectory',
       {
         infer: true
       }
