@@ -1,0 +1,6 @@
+id: pringles_can_lookup
+name: Pringles Can Lookup
+description: Input for retrieving a single Pringles can by its identifier.
+fields:
+  - pringles_can_id
+key: pringles_can_id

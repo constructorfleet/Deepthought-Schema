@@ -1,0 +1,12 @@
+id: pringles_can_stocked
+name: Pringles Can Stocked
+description: >-
+  Emitted when a new Pringles can is added to the pantry inventory.
+  Subscribers project the event into the inventory read model and the
+  daily restock report.
+schema_version: 1
+payload: pringles_can
+delivery: transactional
+aggregate: pringles_can
+topic: inventory.pringles
+ordered: true

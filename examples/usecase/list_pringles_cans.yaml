@@ -1,0 +1,23 @@
+id: list_pringles_cans
+name: List Pringles Cans
+description: >-
+  Returns every Pringles can matching the supplied filter. The query
+  relation maps each input field to the output field it constrains.
+input: pringles_can_filter
+output: pringles_can
+relation:
+  kind: query
+  cardinality: many
+  filters:
+    - inputField: flavor
+      outputField: flavor
+      operator: equals
+    - inputField: stocked_after
+      outputField: stocked_at
+      operator: greater_than_or_equal
+domain: inventory
+permissions:
+  - read_inventory
+safety:
+  mutates: false
+  idempotent: true

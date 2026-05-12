@@ -1,0 +1,10 @@
+id: elementary_charge
+name: Elementary Charge
+description: The electric charge carried by a single proton.
+dataType: number
+symbol: e
+unit:
+  unit: coulomb
+value:
+  value: 1.602176634e-19
+  unit: coulomb

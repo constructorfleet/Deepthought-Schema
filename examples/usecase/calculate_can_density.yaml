@@ -1,0 +1,15 @@
+id: calculate_can_density
+name: Calculate Can Density
+description: >-
+  Computes the mean density of a Pringles can from its physical
+  dimensions. The dimensional relation enforces that mass / volume
+  yields the declared density unit.
+input: pringles_can_dimensions
+output: pringles_can_density
+relation:
+  kind: dimensional
+  cardinality: one
+safety:
+  mutates: false
+  idempotent: true
+  cacheable: true

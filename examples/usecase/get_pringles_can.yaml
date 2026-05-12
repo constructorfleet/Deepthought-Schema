@@ -1,0 +1,33 @@
+id: get_pringles_can
+name: Get Pringles Can
+description: >-
+  Retrieve the Pringles can identified by the supplied id. Returns the
+  full record on success or a not-found error if no can with that id
+  exists in the inventory.
+input: pringles_can_lookup
+output: pringles_can
+relation:
+  kind: key
+  inputKey: pringles_can_id
+  cardinality: one
+domain: inventory
+permissions:
+  - read_inventory
+errors:
+  - pringles_can_not_found
+safety:
+  mutates: false
+  idempotent: true
+  cacheable:
+    ttl: 30s
+    vary:
+      - pringles_can_id
+  latencyTarget: 50ms
+observability:
+  metrics:
+    - name: inventory.get_pringles_can.calls
+      kind: counter
+      description: Total invocations of get_pringles_can.
+      labels:
+        - actor
+        - outcome

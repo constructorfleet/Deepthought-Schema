@@ -1,0 +1,24 @@
+id: standard_screen_resolutions
+name: Standard Screen Resolutions
+description: Common named display resolutions used across consumer hardware.
+kind: model
+model: resolution
+values:
+  - id: high_definition
+    name: HD
+    description: 720p high definition.
+    value:
+      width: 1280
+      height: 720
+  - id: full_high_definition
+    name: Full HD
+    description: 1080p full high definition.
+    value:
+      width: 1920
+      height: 1080
+  - id: ultra_high_definition_four_k
+    name: UHD 4K
+    description: 2160p ultra high definition.
+    value:
+      width: 3840
+      height: 2160

@@ -1,6 +1,12 @@
 # Deepthought-Schema
-Specification schema for models, data types, and domain-interfacing operations that facilitate **Documentation Driven 
-Development** for self-generated-code, self-validating, self-describing, auto-tested. and self-testing generated source code scaffolding for the Domain-Interfacing logic.
+Specification schemas and tooling for models, data types, and domain-interfacing operations that facilitate **Documentation Driven
+Development**: living documentation, generated test surfaces, generated correctness checks, and generated code scaffolding derived from the same source specifications.
+
+The `deepthought` package is the execution surface for that idea. Validation remains a built-in framework command, and output-producing workflows are moving behind a generator interface so docs, tests, code, and future correctness-check generators can be discovered and invoked consistently from the CLI.
+
+The `tests` generator now exposes a language-neutral manifest backend intended for downstream generators in Python, TypeScript, Go, Rust, and other ecosystems. That contract is defined in `src/deepthought/tests/test_manifest.schema.json`, and backend-specific emitters should target the manifest rather than reparsing the source YAML directly. The built-in backends now include Python `unittest` stubs with generated helper dataclasses, TypeScript for explicit Vitest or Jest stubs with generated helper interfaces, Go `_test.go` scaffolds with generated helper structs, and Rust scaffolds with generated helper structs plus a `Cargo.toml`/`src/` crate layout, all emitted from that shared manifest and aligned on the same helper field names where the host language allows it.
+
+You can print the packaged test-manifest schema path with `deepthought test-schema`, or print the schema JSON directly with `deepthought test-schema --format json`.
 
 ## Schema Types
 
@@ -262,6 +268,217 @@ There is no way that the input units (`inches`/`centimeter` and `grams`) - could
 units (`meter / second`) specified in the `density` model based on the known units in the system.
 
 Use Cases can be chained, accept multiple models, provide permission validation and are completely reusable.
+
+#### Use Case Relations
+
+By default, a Use Case asserts a **dimensional** relation between its inputs and its output: the units on the
+input fields, when combined dimensionally, must yield the units of the output. That contract is exactly right
+for compute-style work (`density = mass / volume`) but it is the *wrong* contract for data-retrieval work, where
+the input is a lookup key and the output is the record identified by that key. The two never share a dimension.
+
+To support both, every Use Case may declare an explicit `relation`:
+
+| `relation.kind` | When to use it | Match contract |
+|-----------------|----------------|----------------|
+| `dimensional` (default) | Compute / transform / derive | Units of input fields are dimensionally combinable into the units of the output fields |
+| `key`                   | "Get by id" / "Get by slug" lookups | An input field value is matched against the output model's `key` field (or the explicit `outputKey`) |
+| `query`                 | Filter / search / list endpoints | Each input field constrains a named output field; output cardinality is typically `many` |
+| `opaque`                | External APIs, side effects, hashes, translations, anything DeepThought can't reason about | None — the author asserts a contract DeepThought cannot validate. A `reason` is required so the escape hatch is always documented. |
+
+**Key relation — data retrieval by id:**
+
+```yaml
+# pringles.fields.yml
+- id: pringles_can_id
+  type: string
+  name: Pringles Can Id
+  description: Stable identifier for a specific Pringles can on the shelf
+- id: stocked_at
+  type: string
+  name: Stocked At
+  description: ISO-8601 timestamp the can was stocked
+
+# pringles.models.yml
+pringles_can_lookup:
+  name: Pringles Can Lookup
+  description: Looks up a single Pringles can by id
+  fields:
+    - pringles_can_id
+
+pringles_can:
+  name: Pringles Can
+  description: A specific Pringles can on the shelf
+  fields:
+    - pringles_can_id
+    - radius
+    - height
+    - mass
+    - stocked_at
+  key: pringles_can_id
+
+# pringles.usecases.yml
+get_pringles_can:
+  name: Get Pringles Can
+  description: Retrieves a Pringles can by its id
+  input: pringles_can_lookup
+  output: pringles_can
+  relation:
+    kind: key
+    inputKey: pringles_can_id
+    cardinality: one
+```
+
+The `pringles_can_id` on the input does not — and cannot — combine dimensionally into the `radius`,
+`height`, or `mass` of the output. Declaring `relation.kind: key` tells DeepThought to skip dimensional
+analysis and instead check that `inputKey` resolves against the output model's `key`.
+
+**Query relation — filter / search:**
+
+```yaml
+# pringles.models.yml
+pringles_can_filter:
+  name: Pringles Can Filter
+  description: Filter for searching the stocked-can inventory
+  fields:
+    - flavor
+    - stocked_after
+
+# pringles.usecases.yml
+list_pringles_cans:
+  name: List Pringles Cans
+  description: Returns every can matching the supplied filter
+  input: pringles_can_filter
+  output: pringles_can
+  relation:
+    kind: query
+    cardinality: many
+    filters:
+      - inputField: flavor
+        outputField: flavor
+        operator: equals
+      - inputField: stocked_after
+        outputField: stocked_at
+        operator: greater_than_or_equal
+```
+
+`relation.kind: query` lets the input model be a *predicate* against the output model rather than a
+dimensional precursor of it. Each `filters` entry maps an input field to the output field it constrains
+and the comparison operator to apply.
+
+**Opaque relation — explicit escape hatch:**
+
+Some Use Cases genuinely cannot be validated by DeepThought: an external API call, a cryptographic hash, a
+translation service, a notification dispatch. The input doesn't combine into the output dimensionally, the
+output isn't a record looked up by an input key, and the input isn't a query over the output. Rather than
+torture one of the structured relations into "kind of fitting," declare the contract opaque:
+
+```yaml
+hash_pringles_can:
+  name: Hash Pringles Can
+  description: Computes a stable content hash of a Pringles can record
+  input: pringles_can
+  output: pringles_can_hash
+  relation:
+    kind: opaque
+    reason: One-way SHA-256; output bytes have no dimensional or key relationship to the input fields
+    pure: true
+```
+
+```yaml
+notify_pantry_owner:
+  name: Notify Pantry Owner
+  description: Sends a push notification when the pantry is below threshold
+  input:
+    - pantry_dimensions
+    - notification_settings
+  output: notification_dispatch_receipt
+  relation:
+    kind: opaque
+    reason: External notification provider; receipt is provider-assigned and unrelated to input units
+    pure: false
+```
+
+`relation.kind: opaque` tells DeepThought to skip both dimensional analysis and key/query resolution, but
+`reason` is **required** so opting out is always accompanied by a documented justification — the escape
+hatch should be visible in code review, not silent. The optional `pure` flag signals whether the use case
+has observable side effects (defaults to `false`), which downstream tooling can use to decide whether the
+operation is safe to retry or memoize.
+
+### Collections
+
+A **Collection** is a named, finite set of typed values that share a common kind — think *enums, but where
+every member shares a dimension or a model*. Collections compose with Use Cases: a `relation.kind: key` use
+case can resolve its lookup against a Collection just as easily as against a stored model.
+
+There are two flavors:
+
+**Scalar collection** — every entry is a single value of the same `dataType` and (optionally) `unit`:
+
+```yaml
+# paper_sizes.collection.yaml
+id: a_series_paper_widths
+name: A Series Paper Widths
+description: ISO 216 A-series paper widths, longest edge
+kind: scalar
+dataType: number
+unit: millimeter
+values:
+  - id: a3
+    name: A3
+    value: 420
+  - id: a4
+    name: A4
+    value: 297
+  - id: a5
+    name: A5
+    value: 210
+```
+
+Because every entry shares `unit: millimeter`, the collection itself is dimensionally meaningful — it can be
+the output of a use case that resolves a paper size to its width and pass dimensional analysis the same way
+a single field would.
+
+**Model collection** — every entry is an instance of the same model:
+
+```yaml
+# screen_resolutions.collection.yaml
+id: standard_screen_resolutions
+name: Standard Screen Resolutions
+description: Common named display resolutions
+kind: model
+model: resolution
+key: id
+values:
+  - id: hd
+    name: HD
+    value:
+      width: 1280
+      height: 720
+  - id: full_hd
+    name: Full HD
+    value:
+      width: 1920
+      height: 1080
+  - id: uhd_4k
+    name: UHD 4K
+    value:
+      width: 3840
+      height: 2160
+```
+
+A model collection is the natural target for a key-relation use case:
+
+```yaml
+get_resolution:
+  name: Get Standard Resolution
+  description: Resolves a named standard resolution to its width / height
+  input: resolution_lookup     # has a single `id` field
+  output: standard_screen_resolutions
+  relation:
+    kind: key
+    inputKey: id
+    cardinality: one
+```
 
 ## Chained Use Cases with Multiple Input Models
 

@@ -1,0 +1,7 @@
+id: pringles_can_dimensions
+name: Pringles Can Dimensions
+description: Physical measurements of a single Pringles can.
+fields:
+  - pringles_can_radius
+  - pringles_can_height
+  - pringles_can_mass

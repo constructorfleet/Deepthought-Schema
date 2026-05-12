@@ -1,0 +1,10 @@
+id: ampere
+name: Ampere
+description: SI base unit of electric current; one coulomb of charge per second.
+label:
+  single: amp
+  plural: amps
+  symbol: A
+conversion:
+  unit: coulomb
+  conversion: 1.0

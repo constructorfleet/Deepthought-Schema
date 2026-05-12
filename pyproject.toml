@@ -1,0 +1,63 @@
+[build-system]
+requires = ["setuptools>=64", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepthought"
+version = "0.1.0"
+description = "Documentation-Driven Development toolkit: validation, doc / test / code generation from specifications"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+authors = [
+    { name = "Teagan Glenn" }
+]
+keywords = [
+    "deepthought",
+    "documentation-driven-development",
+    "json-schema",
+    "yaml",
+    "specification",
+]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Documentation",
+    "Topic :: Software Development :: Documentation",
+]
+dependencies = [
+    "json-schema-for-humans>=1.5.1",
+    "jsonschema>=4.26.0",
+    "PyYAML>=6.0",
+]
+
+[project.scripts]
+deepthought = "deepthought.cli:main"
+
+[project.entry-points."deepthought.generators"]
+checks = "deepthought.generators.checks:ChecksGenerator"
+docs = "deepthought.generators.docs:DocsGenerator"
+tests = "deepthought.generators.tests:TestsGenerator"
+
+[project.urls]
+Homepage = "https://github.com/Teagan42/deepthought-schema"
+Documentation = "https://teagan42.github.io/deepthought-schema/"
+Repository = "https://github.com/Teagan42/deepthought-schema"
+
+[tool.setuptools]
+package-dir = { "" = "src" }
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+# When publishing to PyPI we'll copy ../meta-schema/*.yaml into
+# src/deepthought/schemas/ at build time so the wheel ships the
+# meta-schemas. Editable installs resolve the canonical meta-schema/
+# directory directly via meta_schemas.bundled_schemas_dir().
+[tool.setuptools.package-data]
+deepthought = ["schemas/*.yaml", "tests/*.schema.json"]

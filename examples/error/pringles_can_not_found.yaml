@@ -1,0 +1,15 @@
+id: pringles_can_not_found
+name: Pringles Can Not Found
+description: >-
+  Raised when no Pringles can with the supplied identifier exists in the
+  inventory. Callers can recover by re-querying the inventory or by
+  prompting the operator to stock the missing item.
+category: not_found
+payload: pringles_can_lookup
+retryable: never
+recovery:
+  - kind: use_alternative
+    target: list_pringles_cans
+    description: >-
+      Fetch the current inventory list to confirm the can is genuinely
+      absent rather than stale-cached.

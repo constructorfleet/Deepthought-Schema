@@ -1,0 +1,12 @@
+id: person_height_metric
+name: Person Height
+description: Standing height of a person measured to the nearest centimeter.
+dataType: number
+unit: meter
+coerce: true
+constraints:
+  - exclusiveMinimum: 0
+  - maximum: 3
+  - precision:
+      value: 1
+      unit: centimeter

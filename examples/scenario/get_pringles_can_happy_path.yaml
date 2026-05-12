@@ -1,0 +1,23 @@
+id: get_pringles_can_happy_path
+name: Get Pringles Can Happy Path
+description: >-
+  Looking up an existing Pringles can by id returns the full record.
+tags:
+  - smoke
+  - regression
+usecase: get_pringles_can
+given:
+  - exists: pringles_can
+    values:
+      pringles_can_id: 0192d8a4-6a5b-7c4f-8a5b-1234567890ab
+      flavor: Original
+      stocked_at: '2026-05-01T12:00:00Z'
+  - actor: pantry_owner
+when:
+  input:
+    pringles_can_id: 0192d8a4-6a5b-7c4f-8a5b-1234567890ab
+then:
+  - output:
+      pringles_can_id: 0192d8a4-6a5b-7c4f-8a5b-1234567890ab
+      flavor: Original
+      stocked_at: '2026-05-01T12:00:00Z'

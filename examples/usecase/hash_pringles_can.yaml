@@ -1,0 +1,18 @@
+id: hash_pringles_can
+name: Hash Pringles Can
+description: >-
+  Computes a stable content hash of a Pringles can record. The relation
+  is opaque because the input fields and the output bytes share no
+  dimensional or key relationship.
+input: pringles_can
+output: pringles_can_hash
+relation:
+  kind: opaque
+  reason: >-
+    SHA-256 over a canonical encoding of the input; the output bytes
+    are unrelated to the input fields' units or identity.
+  pure: true
+safety:
+  mutates: false
+  idempotent: true
+  cacheable: true

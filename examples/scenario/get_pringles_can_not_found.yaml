@@ -1,0 +1,15 @@
+id: get_pringles_can_not_found
+name: Get Pringles Can Not Found
+description: Looking up a Pringles can id that doesn't exist raises the not-found error.
+tags:
+  - regression
+  - negative
+usecase: get_pringles_can
+given:
+  - statement: No Pringles can exists with id 00000000-0000-0000-0000-000000000000.
+  - actor: pantry_owner
+when:
+  input:
+    pringles_can_id: '00000000-0000-0000-0000-000000000000'
+then:
+  - raises: pringles_can_not_found

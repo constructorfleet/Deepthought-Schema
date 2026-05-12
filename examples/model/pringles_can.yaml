@@ -1,0 +1,28 @@
+id: pringles_can
+name: Pringles Can
+description: A specific Pringles can on the pantry shelf.
+fields:
+  - pringles_can_id
+  - flavor
+  - pringles_can_radius
+  - pringles_can_height
+  - pringles_can_mass
+  - stocked_at
+key: pringles_can_id
+queryable:
+  - flavor
+  - stocked_at
+domain: inventory
+persistence:
+  kind: stored
+  store: pantry_inventory_db
+  retention: indefinite
+  auditTrail: true
+sensitivity: internal
+references:
+  - id: pantry
+    target: pantry
+    cardinality: many_to_one
+    via: pantry_id
+    onDelete: restrict
+    description: The pantry that holds this can.

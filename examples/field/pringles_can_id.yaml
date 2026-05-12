@@ -1,0 +1,7 @@
+id: pringles_can_id
+name: Pringles Can Identifier
+description: Stable identifier for a specific Pringles can on the shelf.
+dataType: string
+constraints:
+  - format: GUID
+  - immutable: true

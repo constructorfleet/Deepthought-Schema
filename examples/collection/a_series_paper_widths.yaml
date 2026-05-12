@@ -1,0 +1,26 @@
+id: a_series_paper_widths
+name: A Series Paper Widths
+description: ISO 216 A-series paper widths (longest edge), in millimeters.
+kind: scalar
+dataType: number
+unit:
+  unit: millimeter
+values:
+  - id: a_three
+    name: A3
+    description: A3 paper, longest edge.
+    value:
+      value: 420
+      unit: millimeter
+  - id: a_four
+    name: A4
+    description: A4 paper, longest edge.
+    value:
+      value: 297
+      unit: millimeter
+  - id: a_five
+    name: A5
+    description: A5 paper, longest edge.
+    value:
+      value: 210
+      unit: millimeter

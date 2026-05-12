@@ -1,0 +1,29 @@
+id: inventory
+name: Inventory
+description: >-
+  Bounded context covering pantry inventory: every Pringles can on the
+  shelf, who can read or modify it, and the lifecycle events it emits.
+owner: pantry-team
+classification: core
+glossary:
+  - term: Pringles Can
+    definition: >-
+      A single cylindrical container of Pringles chips identified by a
+      stable id. Aggregates dimensions, flavor, stock metadata, and
+      lifecycle state.
+    synonyms:
+      - Can
+      - Tube
+exports:
+  models:
+    - pringles_can
+    - pringles_can_lookup
+  usecases:
+    - get_pringles_can
+    - list_pringles_cans
+    - stock_pringles_can
+  events:
+    - pringles_can_stocked
+    - pringles_can_opened
+  errors:
+    - pringles_can_not_found

@@ -1,0 +1,11 @@
+id: pringles_can_radius
+name: Pringles Can Radius
+description: Distance from the central axis to the outer wall of a Pringles can.
+dataType: number
+unit: centimeter
+coerce: true
+constraints:
+  - minimum: 0
+  - maximum:
+      value: 1
+      unit: meter

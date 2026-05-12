@@ -1,0 +1,39 @@
+id: pringles_can_lifecycle
+name: Pringles Can Lifecycle
+description: >-
+  Lifecycle of a single Pringles can from arrival on the shelf to the
+  empty-can recycling bin.
+target: pringles_can
+stateField: state
+initial: stocked
+states:
+  - id: stocked
+    name: Stocked
+    description: On the shelf, sealed, awaiting consumption.
+    mutableFields:
+      - location
+  - id: opened
+    name: Opened
+    description: Seal broken; partially consumed.
+    requiredFields:
+      - opened_at
+    mutableFields:
+      - chips_remaining
+  - id: empty
+    name: Empty
+    description: All chips consumed; awaiting recycling.
+    terminal: true
+transitions:
+  - id: open_can
+    name: Open Can
+    description: An eater breaks the seal and begins consumption.
+    from: stocked
+    to: opened
+    via: open_pringles_can
+    emits: pringles_can_opened
+  - id: empty_can
+    name: Empty Can
+    description: The last chip is consumed; the can transitions to terminal empty.
+    from: opened
+    to: empty
+    via: consume_last_chip

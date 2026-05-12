@@ -1,0 +1,31 @@
+id: inventory_access
+name: Inventory Access
+description: >-
+  Actors and permissions governing read and write access to the pantry
+  inventory.
+actors:
+  - id: stock_clerk
+    name: Stock Clerk
+    description: Staff member responsible for stocking and counting inventory.
+  - id: pantry_owner
+    name: Pantry Owner
+    description: The household member who owns the pantry and its contents.
+  - id: anonymous_visitor
+    name: Anonymous Visitor
+    description: Unauthenticated caller; can browse the public catalog only.
+    anonymous: true
+permissions:
+  - id: read_inventory
+    name: Read Inventory
+    description: View pantry contents without modifying them.
+    rules:
+      - effect: allow
+        actors: [stock_clerk, pantry_owner]
+        description: Authenticated staff and owners may always read inventory.
+  - id: stock_inventory
+    name: Stock Inventory
+    description: Add or remove cans from the pantry.
+    rules:
+      - effect: allow
+        actors: stock_clerk
+        description: Stock clerks are the only role authorised to stock inventory.
