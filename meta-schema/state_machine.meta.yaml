@@ -1,0 +1,213 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/state_machine"
+title: State Machine
+description: >-
+  Legal lifecycle of an entity: which states it can occupy, which transitions
+  are legal between them, what triggers each transition, and which fields are
+  mutable in which state. State machines are referenced from a model and
+  generate both the runtime state-validation code and the illegal-transition
+  test cases.
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  fieldReferenceSchema:
+    title: Field reference
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  fieldListSchema:
+    title: Field list
+    description: One or more field references on the target model.
+    oneOf:
+      - $ref: "#/definitions/fieldReferenceSchema"
+      - type: array
+        items:
+          $ref: "#/definitions/fieldReferenceSchema"
+        minItems: 1
+        uniqueItems: true
+
+  stateSchema:
+    title: State
+    description: A named state the target entity may occupy.
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: State display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: State description
+        description: >-
+          What this state represents in the domain and what an entity is
+          observable as while occupying it. Required so the meaning of each
+          state is documented as part of the lifecycle, not in surrounding code.
+        type: string
+        minLength: 1
+      mutableFields:
+        title: Mutable fields
+        description: >-
+          Fields the entity is allowed to mutate while in this state. Use
+          the literal `none` to declare the state immutable, `all` to allow
+          any field, or list specific fields.
+        oneOf:
+          - const: none
+          - const: all
+          - $ref: "#/definitions/fieldListSchema"
+      requiredFields:
+        title: Required fields
+        description: >-
+          Fields that must be non-null while in this state. Example: a
+          shipped order requires shipped_at and tracking_number.
+        $ref: "#/definitions/fieldListSchema"
+      terminal:
+        title: Terminal state
+        description: >-
+          Marks a state as final / absorbing -- no transitions may leave
+          it. Generators emit assertions accordingly.
+        type: boolean
+        default: false
+    required:
+      - id
+      - name
+      - description
+
+  transitionSchema:
+    title: Transition
+    description: A legal move between states, scoped to the use case that effects it.
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Transition display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Transition description
+        description: >-
+          What changes when this transition fires and why it exists. Required
+          so the lifecycle event is documented inherent to the transition.
+        type: string
+        minLength: 1
+      from:
+        title: Source state(s)
+        description: >-
+          State or states the transition may originate from. The literal
+          `any` permits the transition from any non-terminal state.
+        oneOf:
+          - const: any
+          - $ref: "#/definitions/identifierSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/identifierSchema"
+            minItems: 1
+            uniqueItems: true
+      to:
+        title: Destination state
+        $ref: "#/definitions/identifierSchema"
+      via:
+        title: Triggering use case
+        description: >-
+          The use case that effects this transition. Wires the state
+          machine to the operation contract so generated code can assert
+          "calling `ship_order` is the only path to `shipped`".
+        oneOf:
+          - $ref: "#/definitions/identifierSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/identifierSchema"
+            minItems: 1
+            uniqueItems: true
+      guard:
+        title: Guard predicate
+        description: >-
+          Predicate that must hold for the transition to be legal,
+          evaluated against the entity's current state and incoming inputs.
+        $ref: "expression.meta.yaml"
+      emits:
+        title: Emitted events
+        description: Events emitted when this transition fires.
+        oneOf:
+          - $ref: "#/definitions/identifierSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/identifierSchema"
+            minItems: 1
+            uniqueItems: true
+    required:
+      - id
+      - description
+      - from
+      - to
+
+  stateMachineSchema:
+    title: State machine
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: State machine display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: State machine description
+        description: What entity lifecycle this state machine governs and why.
+        type: string
+        minLength: 1
+      target:
+        title: Target model
+        description: >-
+          The model whose lifecycle this state machine governs. The
+          stateField on that model holds the current state id.
+        $ref: "#/definitions/identifierSchema"
+      stateField:
+        title: State field
+        description: >-
+          Field on the target model that records the current state. Defaults
+          to `state` when omitted; declare explicitly when the model uses a
+          different name.
+        $ref: "#/definitions/fieldReferenceSchema"
+      initial:
+        title: Initial state
+        description: The state newly created instances enter.
+        $ref: "#/definitions/identifierSchema"
+      states:
+        title: States
+        type: array
+        minItems: 2
+        items:
+          $ref: "#/definitions/stateSchema"
+      transitions:
+        title: Transitions
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/transitionSchema"
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+      - target
+      - initial
+      - states
+      - transitions
+
+allOf:
+  - $ref: "#/definitions/stateMachineSchema"
+
+type: object
+default: true

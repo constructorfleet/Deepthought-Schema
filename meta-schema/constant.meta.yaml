@@ -33,7 +33,11 @@ definitions:
                 - const: integer
                 - const: number
         then:
-          $ref: "field.meta.yaml#/definitions/valueExpressionSchema"
+          properties:
+            value:
+              $ref: "field.meta.yaml#/definitions/valueExpressionSchema"
+          required:
+            - value
       - if:
           properties:
             dataType:

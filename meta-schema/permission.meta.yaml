@@ -1,0 +1,206 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/permission"
+title: Permission
+description: >-
+  Who may invoke a use case (or read/write a model field) and under what
+  conditions. Permissions are split across two concepts. Actors are classes of
+  caller (admin, customer, service-account, anonymous) -- domain-level roles,
+  not transport-layer auth tokens. Permissions are named capabilities that
+  grant one or more actors the right to perform an action, optionally gated by
+  a conditional expression. Use cases reference permissions; models can
+  reference permissions at field-level granularity for read/write visibility.
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  actorSchema:
+    title: Actor
+    description: >-
+      A class of caller. Actors are domain-level roles that exist
+      independently of any specific authentication mechanism, so the same
+      actor model survives transport changes.
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Actor display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Actor description
+        description: >-
+          What this actor represents in the domain and what real-world
+          subject(s) typically map to it. Required so the role's purpose is
+          documented alongside its definition.
+        type: string
+        minLength: 1
+      extends:
+        title: Inherited actors
+        description: >-
+          Actors this actor subsumes. The current actor is granted every
+          permission held by each of the listed actors.
+        oneOf:
+          - $ref: "#/definitions/identifierSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/identifierSchema"
+            minItems: 1
+            uniqueItems: true
+      anonymous:
+        title: Represents an anonymous caller
+        description: >-
+          Whether this actor represents an unauthenticated caller. Drives
+          generators' anonymous-access middleware decisions.
+        type: boolean
+        default: false
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+    not:
+      anyOf:
+        - required:
+            - rules
+        - required:
+            - actors
+        - required:
+            - permissions
+
+  effectSchema:
+    title: Rule effect
+    description: Whether the matching rule grants or denies the action.
+    enum:
+      - allow
+      - deny
+
+  permissionRuleSchema:
+    title: Permission rule
+    description: >-
+      A single grant or denial. Rules in a permission are evaluated
+      top-to-bottom; the first matching rule wins. A trailing implicit
+      "deny any" applies if no rule matches.
+    type: object
+    properties:
+      effect:
+        $ref: "#/definitions/effectSchema"
+      actors:
+        title: Subject actors
+        description: >-
+          Actors this rule applies to. The literal `any` matches every
+          actor (including anonymous).
+        oneOf:
+          - const: any
+          - $ref: "#/definitions/identifierSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/identifierSchema"
+            minItems: 1
+            uniqueItems: true
+      condition:
+        title: Conditional predicate
+        description: >-
+          Predicate evaluated at call time. Conventional reference paths
+          available to the expression are `actor` (the calling actor),
+          `input`, `output`, and `resource`.
+        $ref: "expression.meta.yaml"
+      description:
+        title: Rule description
+        description: Why this rule exists. Required so authorization intent stays inherent to the rule.
+        type: string
+        minLength: 1
+    required:
+      - effect
+      - actors
+      - description
+
+  permissionSchema:
+    title: Permission
+    description: A named capability composed of one or more rules.
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Permission display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Permission description
+        description: What the capability authorizes and the policy intent behind it.
+        type: string
+        minLength: 1
+      rules:
+        title: Rules
+        description: Ordered rules. First match wins; an implicit deny applies if none match.
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/permissionRuleSchema"
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+      - rules
+
+  permissionSetSchema:
+    title: Permission set
+    description: >-
+      A bundle of related actors and permissions defined together. Useful
+      when a domain owns several actors and the permissions that connect
+      them; otherwise individual actor or permission documents are fine.
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Set display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Set description
+        description: What this bundle of actors and permissions models in the domain.
+        type: string
+        minLength: 1
+      actors:
+        title: Actors in this set
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/actorSchema"
+      permissions:
+        title: Permissions in this set
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/permissionSchema"
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+    anyOf:
+      - required:
+          - actors
+      - required:
+          - permissions
+
+oneOf:
+  - $ref: "#/definitions/permissionSetSchema"
+  - $ref: "#/definitions/permissionSchema"
+  - $ref: "#/definitions/actorSchema"
+
+type: object
+default: true

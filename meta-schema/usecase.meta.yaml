@@ -1,0 +1,565 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/usecase"
+title: Use Case
+description: >-
+  A Domain-Interfacing Use Case: a contract between an input model (or
+  collection) and an output model (or collection), augmented with the
+  permissions, errors, events, lifecycle transitions, safety guarantees,
+  observability surface, and acceptance criteria that together describe
+  exactly what the operation does. The relation discriminator says how the
+  output is produced from the input -- by dimensional combination, by key
+  lookup, by query / filter, or as an explicitly opaque external call.
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  fieldReferenceSchema:
+    title: Field reference
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  modelReferenceSchema:
+    title: Model / collection reference
+    description: One or more model or collection identifiers used as input or output.
+    oneOf:
+      - $ref: "#/definitions/identifierSchema"
+      - type: array
+        items:
+          $ref: "#/definitions/identifierSchema"
+        minItems: 1
+        uniqueItems: true
+
+  identifierListSchema:
+    title: Identifier list
+    oneOf:
+      - $ref: "#/definitions/identifierSchema"
+      - type: array
+        items:
+          $ref: "#/definitions/identifierSchema"
+        minItems: 1
+        uniqueItems: true
+
+  cardinalitySchema:
+    title: Output cardinality
+    description: Whether the use case returns one record or many.
+    enum:
+      - one
+      - many
+
+  dimensionalRelationSchema:
+    title: Dimensional relation
+    description: >-
+      The unit-bearing fields on the input model(s) must be dimensionally
+      combinable to yield the unit-bearing fields on the output model.
+      The original DeepThought contract for compute-style use cases (e.g.
+      density = mass / volume).
+    type: object
+    properties:
+      kind:
+        const: dimensional
+      cardinality:
+        $ref: "#/definitions/cardinalitySchema"
+    required:
+      - kind
+
+  keyRelationSchema:
+    title: Key relation
+    description: >-
+      Data-retrieval style. The input supplies a lookup key (an id, slug,
+      etc.) and the output is the record identified by that key.
+      Dimensional analysis is bypassed because the input key and output
+      payload do not share a dimension -- they relate by identity.
+    type: object
+    properties:
+      kind:
+        const: key
+      inputKey:
+        title: Input key field(s)
+        description: Field(s) on the input model whose values supply the lookup key.
+        oneOf:
+          - $ref: "#/definitions/fieldReferenceSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/fieldReferenceSchema"
+            minItems: 1
+            uniqueItems: true
+      outputKey:
+        title: Output key field(s)
+        description: >-
+          Field(s) on the output model that the inputKey resolves against.
+          Defaults to the output model's declared `key`.
+        oneOf:
+          - $ref: "#/definitions/fieldReferenceSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/fieldReferenceSchema"
+            minItems: 1
+            uniqueItems: true
+      cardinality:
+        $ref: "#/definitions/cardinalitySchema"
+    required:
+      - kind
+      - inputKey
+
+  queryRelationSchema:
+    title: Query relation
+    description: >-
+      Data-retrieval style with a filter / predicate as the input. The
+      output is zero, one, or many records that match. Each filter pairs
+      an input field with the output field it constrains; if `filters` is
+      omitted, every input field is assumed to filter the same-named
+      field on the output.
+    type: object
+    properties:
+      kind:
+        const: query
+      filters:
+        title: Filter clauses
+        type: array
+        items:
+          type: object
+          properties:
+            inputField:
+              $ref: "#/definitions/fieldReferenceSchema"
+            outputField:
+              $ref: "#/definitions/fieldReferenceSchema"
+            operator:
+              title: Filter operator
+              enum:
+                - equals
+                - not_equals
+                - contains
+                - starts_with
+                - ends_with
+                - greater_than
+                - greater_than_or_equal
+                - less_than
+                - less_than_or_equal
+                - in
+                - matches
+              default: equals
+          required:
+            - inputField
+            - outputField
+        minItems: 1
+      cardinality:
+        $ref: "#/definitions/cardinalitySchema"
+    required:
+      - kind
+
+  opaqueRelationSchema:
+    title: Opaque relation
+    description: >-
+      Explicit escape hatch. The author asserts that the input/output
+      contract cannot be validated by DeepThought -- external API calls,
+      side-effecting operations, hashes, encryptions, translations.
+      `reason` is required so opting out is always accompanied by a
+      documented justification rather than silent abuse.
+    type: object
+    properties:
+      kind:
+        const: opaque
+      reason:
+        title: Opt-out justification
+        description: Why structured analysis is being bypassed for this use case.
+        type: string
+        minLength: 1
+      pure:
+        title: Pure operation
+        description: >-
+          Whether the operation has observable side effects. Drives
+          generated retry / memoization decisions.
+        type: boolean
+        default: false
+      cardinality:
+        $ref: "#/definitions/cardinalitySchema"
+    required:
+      - kind
+      - reason
+
+  relationSchema:
+    title: Use case relation
+    description: How the output is produced from the input.
+    oneOf:
+      - $ref: "#/definitions/dimensionalRelationSchema"
+      - $ref: "#/definitions/keyRelationSchema"
+      - $ref: "#/definitions/queryRelationSchema"
+      - $ref: "#/definitions/opaqueRelationSchema"
+
+  errorRefSchema:
+    title: Error reference
+    description: >-
+      A typed failure mode of this use case. Either a bare error id or an
+      object overriding the raise condition for this specific call site
+      (the canonical condition lives on the error definition itself).
+    oneOf:
+      - $ref: "#/definitions/identifierSchema"
+      - type: object
+        properties:
+          error:
+            $ref: "#/definitions/identifierSchema"
+          when:
+            title: Call-site raise condition
+            description: Predicate specific to this use case that triggers the error.
+            $ref: "expression.meta.yaml"
+          observed:
+            title: Observed in production
+            description: >-
+              Whether this failure has been observed in production. Lets
+              generators tag tests as "documented but unobserved".
+            type: boolean
+        required:
+          - error
+
+  emitsEventSchema:
+    title: Emitted event reference
+    description: An event emitted by this use case, optionally guarded by a predicate.
+    oneOf:
+      - $ref: "#/definitions/identifierSchema"
+      - type: object
+        properties:
+          event:
+            $ref: "#/definitions/identifierSchema"
+          when:
+            title: Emission condition
+            description: Predicate that gates whether the event is emitted on a given call.
+            $ref: "expression.meta.yaml"
+        required:
+          - event
+
+  transitionRefSchema:
+    title: Lifecycle transition reference
+    description: >-
+      A state-machine transition effected by this use case. Wires the
+      operation contract back to the entity lifecycle declared on the
+      affected model so generated code can assert "calling this use case
+      is the only path to the destination state".
+    type: object
+    properties:
+      model:
+        title: Affected model identifier
+        $ref: "#/definitions/identifierSchema"
+      transition:
+        title: Transition identifier
+        description: Identifier of the transition declared on the model's state machine.
+        $ref: "#/definitions/identifierSchema"
+      from:
+        title: Source state identifier
+        description: Optional shorthand when the transition isn't formally declared.
+        $ref: "#/definitions/identifierSchema"
+      to:
+        title: Destination state identifier
+        $ref: "#/definitions/identifierSchema"
+    required:
+      - model
+
+  rateLimitSchema:
+    title: Rate limit
+    description: Maximum invocation rate for this use case.
+    type: object
+    properties:
+      limit:
+        title: Limit count
+        description: Maximum number of invocations within the window.
+        type: integer
+        minimum: 1
+      window:
+        title: Window duration
+        description: Time window the limit applies over (e.g. "1m", "1h").
+        type: string
+        minLength: 1
+      per:
+        title: Limit subject
+        description: Identifier the limit is keyed by (actor, tenant, etc.).
+        $ref: "#/definitions/identifierSchema"
+    required:
+      - limit
+      - window
+
+  cacheableSchema:
+    title: Cacheability
+    description: >-
+      Either a boolean (cacheable / not) or a structured policy with TTL
+      and varying-by-field rules.
+    oneOf:
+      - type: boolean
+      - type: object
+        properties:
+          ttl:
+            title: Time-to-live
+            description: Cache lifetime as a duration string (e.g. "5m").
+            type: string
+            minLength: 1
+          vary:
+            title: Cache key fields
+            description: Fields that contribute to the cache key.
+            type: array
+            items:
+              $ref: "#/definitions/fieldReferenceSchema"
+            minItems: 1
+            uniqueItems: true
+        required:
+          - ttl
+
+  safetySchema:
+    title: Safety / invocation classification
+    description: >-
+      Classification that drives generator decisions about HTTP method,
+      retry policy, cache headers, and the test suite (read-only ops
+      should be safe to call repeatedly; mutating ops shouldn't be
+      retried blindly).
+    type: object
+    properties:
+      mutates:
+        title: Mutates state
+        description: Whether the use case modifies persistent state.
+        type: boolean
+        default: false
+      idempotent:
+        title: Idempotent
+        description: Whether repeating the call with the same input yields the same effect.
+        type: boolean
+        default: false
+      cacheable:
+        $ref: "#/definitions/cacheableSchema"
+      latencyTarget:
+        title: Latency SLO
+        description: Target latency (e.g. "200ms"). Optional.
+        type: string
+        minLength: 1
+      availabilityTarget:
+        title: Availability SLO
+        description: Target availability (e.g. "99.9"). Optional.
+        type: string
+        minLength: 1
+      throughputTarget:
+        title: Throughput SLO
+        description: Target throughput (e.g. "1000rps"). Optional.
+        type: string
+        minLength: 1
+      rateLimit:
+        $ref: "#/definitions/rateLimitSchema"
+      timeout:
+        title: Timeout
+        description: Hard timeout for the call (e.g. "5s").
+        type: string
+        minLength: 1
+
+  metricSchema:
+    title: Metric
+    description: A signal the use case is expected to emit.
+    type: object
+    properties:
+      name:
+        title: Metric name
+        type: string
+        minLength: 1
+      kind:
+        title: Metric kind
+        enum:
+          - counter
+          - gauge
+          - histogram
+          - summary
+      description:
+        title: Metric description
+        description: What the metric measures and how it should be interpreted.
+        type: string
+        minLength: 1
+      labels:
+        title: Metric labels
+        description: Label dimensions attached to the metric.
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+    required:
+      - name
+      - kind
+      - description
+
+  traceSchema:
+    title: Trace
+    description: Tracing surface emitted by the use case.
+    type: object
+    properties:
+      spanName:
+        title: Span name
+        type: string
+        minLength: 1
+      description:
+        title: Span description
+        description: What the span represents and how it should be interpreted in a trace tree.
+        type: string
+        minLength: 1
+      attributes:
+        title: Span attributes
+        description: Attribute names attached to the span.
+        type: array
+        minItems: 1
+        items:
+          type: string
+          minLength: 1
+    required:
+      - spanName
+      - description
+
+  logEntrySchema:
+    title: Log event
+    description: A structured log event emitted by the use case.
+    type: object
+    properties:
+      event:
+        title: Event name
+        description: Stable event name -- the equivalent of a metric name.
+        type: string
+        minLength: 1
+      level:
+        title: Log level
+        enum:
+          - debug
+          - info
+          - warn
+          - error
+      description:
+        title: Event description
+        description: What this log event signals and when it is emitted.
+        type: string
+        minLength: 1
+    required:
+      - event
+      - level
+      - description
+
+  observabilitySchema:
+    title: Observability surface
+    description: >-
+      Signals the use case is expected to emit. Capturing metrics,
+      traces, and logs in the spec keeps Grafana dashboards and alert
+      rules from drifting away from the contract they describe.
+    type: object
+    properties:
+      metrics:
+        title: Metrics
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/metricSchema"
+      traces:
+        $ref: "#/definitions/traceSchema"
+      logs:
+        title: Log events
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/logEntrySchema"
+
+  usecaseSchema:
+    title: Use case
+    type: object
+    properties:
+      id:
+        title: Use case identifier
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Use case display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Use case description
+        description: >-
+          What this use case does and the domain intent behind it.
+          Required at every site so the operation's purpose is documented
+          inherent to its definition.
+        type: string
+        minLength: 1
+      input:
+        title: Input model(s)
+        $ref: "#/definitions/modelReferenceSchema"
+      output:
+        title: Output model(s)
+        $ref: "#/definitions/modelReferenceSchema"
+      relation:
+        title: Input-output relation
+        description: >-
+          Defaults to { kind: dimensional } when omitted, preserving the
+          historical compute-style contract for use cases that don't
+          declare a relation.
+        $ref: "#/definitions/relationSchema"
+      next:
+        title: Subsequent use case(s)
+        description: Use case(s) chained after this one.
+        $ref: "#/definitions/identifierListSchema"
+      extends:
+        title: Parent use case
+        description: Identifier of a use case this one extends.
+        $ref: "#/definitions/identifierSchema"
+      focus:
+        title: Template focus
+        description: Subject value that fills `{{ this.focus }}` in templated names and descriptions.
+        type: string
+        minLength: 1
+      domain:
+        title: Bounded context
+        description: Bounded context this use case lives in. Inherits from the surrounding document if omitted.
+        $ref: "#/definitions/identifierSchema"
+      errors:
+        title: Typed errors raised
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/errorRefSchema"
+      permissions:
+        title: Required permissions
+        description: Permission identifiers required to invoke the use case.
+        $ref: "#/definitions/identifierListSchema"
+      emits:
+        title: Events emitted
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/emitsEventSchema"
+      transitions:
+        title: Lifecycle transitions effected
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/transitionRefSchema"
+      safety:
+        $ref: "#/definitions/safetySchema"
+      observability:
+        $ref: "#/definitions/observabilitySchema"
+      scenarios:
+        title: Acceptance scenarios
+        description: >-
+          Given/When/Then scenarios exercising this use case. Inline
+          scenarios live alongside the use case; identifier references
+          point to scenarios declared in their own documents.
+        type: array
+        minItems: 1
+        items:
+          oneOf:
+            - $ref: "#/definitions/identifierSchema"
+            - $ref: "scenario.meta.yaml#/definitions/scenarioSchema"
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+      - input
+      - output
+
+allOf:
+  - $ref: "#/definitions/usecaseSchema"
+
+type: object
+default: true

@@ -1,0 +1,294 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/expression"
+title: Expression
+description: >-
+  The shared evaluation language used wherever a DeepThought specification needs
+  to express a value or a predicate at the spec layer rather than in code:
+  cross-field invariants on a model, computed/derived fields, guards on
+  state-machine transitions, conditional permissions, error-raise conditions,
+  and assertions in scenario "then" clauses. Two surface syntaxes are accepted
+  -- a structured AST (always machine-walkable, lower-able into any target
+  language) and a string shorthand (concise, parsed by tooling).
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    description: >-
+      Snake-case identifier used to name domain entities. Stable, lowercase,
+      underscore-separated, never starting or ending with an underscore.
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  fieldPathSchema:
+    title: Field path
+    description: >-
+      Reference to a field on the current model, or on a related model via
+      dot-path. Examples: "shipped_at", "items.amount", "owner.id".
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]*(\\.[a-z][a-z_]*)*$"
+
+  literalSchema:
+    title: Literal value
+    description: >-
+      A literal scalar, array, or null value. May carry a unit so that
+      dimensional analysis still applies inside expressions (e.g. comparing a
+      field in millimeters against a literal {literal: 10, unit: centimeter}).
+    type: object
+    properties:
+      literal:
+        title: Literal value
+        description: The constant value itself. Any JSON-representable scalar or array.
+        anyOf:
+          - type: string
+          - type: number
+          - type: integer
+          - type: boolean
+          - type: "null"
+          - type: array
+            items: {}
+      unit:
+        title: Unit identifier
+        description: >-
+          Optional unit attached to the literal. When present, dimensional
+          analysis treats the literal as a quantity in this unit.
+        type: string
+        pattern: "^[a-z_]+$"
+    required:
+      - literal
+
+  fieldRefSchema:
+    title: Field reference term
+    description: >-
+      Reference to a field by path. Resolves to the value of that field on
+      the entity the expression is evaluated against.
+    type: object
+    properties:
+      field:
+        $ref: "#/definitions/fieldPathSchema"
+    required:
+      - field
+
+  constantRefSchema:
+    title: Constant reference term
+    description: >-
+      Reference to a named constant declared in a constant.meta.yaml document.
+      Resolves to the constant's typed value at evaluation time.
+    type: object
+    properties:
+      constant:
+        $ref: "#/definitions/identifierSchema"
+    required:
+      - constant
+
+  termSchema:
+    title: Expression term
+    description: >-
+      Any leaf or sub-expression usable as an operand: a literal, a field
+      reference, a constant reference, or another nested expression.
+    oneOf:
+      - $ref: "#/definitions/literalSchema"
+      - $ref: "#/definitions/fieldRefSchema"
+      - $ref: "#/definitions/constantRefSchema"
+      - $ref: "#/definitions/shorthandExpressionSchema"
+      - $ref: "#/definitions/comparisonExpressionSchema"
+      - $ref: "#/definitions/logicalExpressionSchema"
+      - $ref: "#/definitions/arithmeticExpressionSchema"
+      - $ref: "#/definitions/aggregateExpressionSchema"
+      - $ref: "#/definitions/callExpressionSchema"
+
+  comparisonOperatorSchema:
+    title: Comparison operator
+    description: Predicate operators that compare two or more terms.
+    enum:
+      - equals
+      - not_equals
+      - greater_than
+      - greater_than_or_equal
+      - less_than
+      - less_than_or_equal
+      - in
+      - not_in
+      - matches
+      - contains
+      - starts_with
+      - ends_with
+      - exists
+      - is_null
+
+  logicalOperatorSchema:
+    title: Logical operator
+    description: Boolean connectives that combine sub-predicates.
+    enum:
+      - and
+      - or
+      - not
+      - implies
+      - iff
+
+  arithmeticOperatorSchema:
+    title: Arithmetic operator
+    description: >-
+      Numeric value operators. Dimensional analysis is enforced for the
+      operators that apply to dimensioned quantities.
+    enum:
+      - add
+      - subtract
+      - multiply
+      - divide
+      - modulo
+      - power
+      - negate
+      - abs
+      - round
+      - ceil
+      - floor
+
+  aggregateOperatorSchema:
+    title: Aggregate operator
+    description: Reductions over a collection-valued field path.
+    enum:
+      - sum
+      - count
+      - min
+      - max
+      - average
+      - all
+      - any
+      - none
+
+  comparisonExpressionSchema:
+    title: Comparison expression
+    description: >-
+      Predicate built from a comparison operator and one or more operands.
+      Example structured form for "status equals shipped":
+      {op: equals, args: [{field: status}, {literal: shipped}]}.
+    type: object
+    properties:
+      op:
+        $ref: "#/definitions/comparisonOperatorSchema"
+      args:
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/termSchema"
+    required:
+      - op
+      - args
+
+  logicalExpressionSchema:
+    title: Logical expression
+    description: Boolean connective applied to one or more sub-predicates.
+    type: object
+    properties:
+      op:
+        $ref: "#/definitions/logicalOperatorSchema"
+      args:
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/termSchema"
+    required:
+      - op
+      - args
+
+  arithmeticExpressionSchema:
+    title: Arithmetic expression
+    description: Numeric computation built from an arithmetic operator and operands.
+    type: object
+    properties:
+      op:
+        $ref: "#/definitions/arithmeticOperatorSchema"
+      args:
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/termSchema"
+    required:
+      - op
+      - args
+
+  aggregateExpressionSchema:
+    title: Aggregate expression
+    description: >-
+      Reduction over a collection-valued field path. Example: the sum of
+      every line_item amount where amount > 0 is
+      {aggregate: sum, over: line_items, of: amount,
+       where: {op: greater_than, args: [{field: amount}, {literal: 0}]}}.
+    type: object
+    properties:
+      aggregate:
+        $ref: "#/definitions/aggregateOperatorSchema"
+      over:
+        title: Collection field path
+        description: Path to the collection-valued field to reduce over.
+        $ref: "#/definitions/fieldPathSchema"
+      of:
+        title: Item field path
+        description: >-
+          Field path on each element to aggregate. Omit when the aggregate
+          operates on the elements themselves (e.g. count).
+        $ref: "#/definitions/fieldPathSchema"
+      where:
+        title: Filter predicate
+        description: Optional predicate applied to elements before reduction.
+        $ref: "#/definitions/expressionSchema"
+    required:
+      - aggregate
+      - over
+
+  callExpressionSchema:
+    title: Function-call expression
+    description: >-
+      Escape hatch for domain-specific functions a generator knows how to
+      lower (e.g. now(), uuid(), hash(...)). Function name and arity are
+      part of the spec; their semantics are documented separately.
+    type: object
+    properties:
+      call:
+        title: Function name
+        type: string
+        minLength: 1
+        pattern: "^[a-z][a-z_0-9]*$"
+      args:
+        title: Argument list
+        type: array
+        items:
+          $ref: "#/definitions/termSchema"
+    required:
+      - call
+
+  shorthandExpressionSchema:
+    title: String-shorthand expression
+    description: >-
+      Concise hand-authored surface syntax (e.g.
+      "status == 'shipped' && total > 0"). Parsing into the AST is left to
+      tooling; this layer just enforces non-empty.
+    type: object
+    properties:
+      expr:
+        title: Expression source
+        type: string
+        minLength: 1
+    required:
+      - expr
+
+  expressionSchema:
+    title: Expression
+    description: Any DeepThought expression -- structured AST or string shorthand.
+    oneOf:
+      - $ref: "#/definitions/shorthandExpressionSchema"
+      - $ref: "#/definitions/comparisonExpressionSchema"
+      - $ref: "#/definitions/logicalExpressionSchema"
+      - $ref: "#/definitions/arithmeticExpressionSchema"
+      - $ref: "#/definitions/aggregateExpressionSchema"
+      - $ref: "#/definitions/callExpressionSchema"
+      - $ref: "#/definitions/literalSchema"
+      - $ref: "#/definitions/fieldRefSchema"
+      - $ref: "#/definitions/constantRefSchema"
+
+allOf:
+  - $ref: "#/definitions/expressionSchema"
+
+default: true

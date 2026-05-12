@@ -85,8 +85,8 @@ definitions:
   valueExpressionSchema:
     oneOf:
       - anyOf:
-        - type: number
-        - type: integer
+          - type: number
+          - type: integer
       - type: object
         properties:
           value:
@@ -216,18 +216,158 @@ definitions:
           required:
             - items
 
+  sensitivityTagSchema:
+    title: Sensitivity classification
+    description: >-
+      Controlled vocabulary for the data-sensitivity tag carried on a
+      field. Drives logging redaction, encryption-at-rest decisions, and
+      compliance reporting -- attributes that rot the fastest in real
+      systems. Declaring sensitivity on the field keeps the classification
+      inherent to the data it describes rather than living in adjacent
+      configuration that drifts.
+    enum:
+      - none
+      - internal
+      - confidential
+      - pii
+      - phi
+      - pci
+      - secret
+
+  sensitivitySchema:
+    title: Sensitivity tag
+    description: >-
+      A sensitivity classification or a list of overlapping classifications
+      (a field can be both PII and confidential, for example).
+    oneOf:
+      - $ref: "#/definitions/sensitivityTagSchema"
+      - type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          $ref: "#/definitions/sensitivityTagSchema"
+
+  lifecycleSchema:
+    title: Lifecycle
+    description: >-
+      Versioning and deprecation metadata. Reused on fields, models, use
+      cases, events, errors, and other top-level entities so migration
+      documentation can't lie the moment any of them changes.
+    type: object
+    properties:
+      since:
+        title: Introduced in
+        description: Version string the entity was first introduced in.
+        type: string
+        minLength: 1
+      deprecated:
+        title: Deprecated
+        description: Whether the entity is deprecated.
+        type: boolean
+      deprecatedSince:
+        title: Deprecated since
+        description: Version string in which deprecation was announced.
+        type: string
+        minLength: 1
+      deprecatedReason:
+        title: Deprecation rationale
+        description: >-
+          Why this entity is deprecated and what consumers should do
+          instead. Required when deprecated is true so the migration story
+          stays inherent to the deprecation.
+        type: string
+        minLength: 1
+      replacedBy:
+        title: Replacement identifier
+        description: Identifier of the replacement entity, when one exists.
+        type: string
+        minLength: 1
+        pattern: "^[a-z][a-z_]+[a-z]$"
+      removalPlanned:
+        title: Removal planned in
+        description: Version string in which the entity is scheduled for removal.
+        type: string
+        minLength: 1
+      stability:
+        title: Stability
+        description: Maturity tier for downstream consumers.
+        enum:
+          - experimental
+          - beta
+          - stable
+          - frozen
+    allOf:
+      - if:
+          properties:
+            deprecated:
+              const: true
+          required:
+            - deprecated
+        then:
+          required:
+            - deprecatedReason
+
+  computedFieldSchema:
+    title: Computed field expression
+    description: >-
+      Marks a field as derived from other fields rather than supplied by
+      the caller. The expression is unit-checked against the field's
+      declared unit so dimensional analysis stays honest for derivations
+      as well as for inputs.
+    type: object
+    properties:
+      expression:
+        title: Derivation expression
+        description: Expression that produces the field's value.
+        $ref: "expression.meta.yaml"
+      evaluation:
+        title: Evaluation strategy
+        description: >-
+          When the value is materialized -- on every read (default), on
+          write (memoized), or lazily on first access.
+        enum:
+          - on_read
+          - on_write
+          - lazy
+        default: on_read
+      dependsOn:
+        title: Dependencies
+        description: >-
+          Other fields whose changes invalidate the cached value. Lets
+          generators emit correct cache-busting on memoized derivations.
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+          pattern: "^[a-z][a-z_]+[a-z]$"
+    required:
+      - expression
+
   metaDataTypeSchema:
+    title: Inline data type
+    description: >-
+      A reusable typed shape -- the same vocabulary as a field but used
+      inline (e.g. as the element type of an array constraint).
     type: object
     properties:
       dataType:
         $ref: "#/definitions/fieldTypes"
       description:
+        title: Inline description
+        description: What this inline shape represents.
         type: string
         minLength: 1
       unit:
+        title: Unit identifier
         type: string
         minLength: 1
         pattern: "^[a-z_]+$"
+      sensitivity:
+        $ref: "#/definitions/sensitivitySchema"
+      lifecycle:
+        $ref: "#/definitions/lifecycleSchema"
     required:
       - dataType
 
@@ -235,27 +375,60 @@ definitions:
       - $ref: "#/definitions/constraintsSchema"
 
   fieldSchema:
+    title: Field
+    description: >-
+      A single typed value with a code-friendly id, a human-readable name,
+      and the constraints, units, sensitivity, and lifecycle metadata that
+      describe it. Names and descriptions are required so the field's
+      meaning travels with the field itself.
     properties:
       id:
+        title: Field identifier
         type: string
         minLength: 1
         pattern: "^[a-z][a-z_]+[a-z]$"
       dataType:
         $ref: "#/definitions/fieldTypes"
       name:
+        title: Field display name
         type: string
         minLength: 1
         pattern: "^[A-Z][a-zA-Z ]+$"
       description:
+        title: Field description
+        description: >-
+          What this field represents and how its value should be
+          interpreted. Required at every field site so the field's meaning
+          is documented inherent to its declaration.
         type: string
         minLength: 1
       unit:
+        title: Unit identifier
+        description: Unit the field's value is denominated in.
         type: string
         minLength: 1
         pattern: "^[a-z_]+$"
       coerce:
+        title: Coerce inputs
+        description: >-
+          Whether incoming values may be coerced (e.g. string-to-number)
+          rather than rejected outright.
         type: boolean
         default: true
+      sensitivity:
+        $ref: "#/definitions/sensitivitySchema"
+      redactInLogs:
+        title: Redact in logs
+        description: Whether log emitters must redact the field's value.
+        type: boolean
+      encryptAtRest:
+        title: Encrypt at rest
+        description: Whether stored representations must encrypt the field's value.
+        type: boolean
+      lifecycle:
+        $ref: "#/definitions/lifecycleSchema"
+      computed:
+        $ref: "#/definitions/computedFieldSchema"
     required:
       - dataType
     allOf:

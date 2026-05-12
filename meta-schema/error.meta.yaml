@@ -1,0 +1,147 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/error"
+title: Error
+description: >-
+  Typed failure mode of one or more use cases. Errors are first-class so
+  generated code can produce typed error returns, exhaustive match arms, and
+  negative-path tests instead of relying on string messages or unchecked
+  exceptions. The condition under which a use case raises an error is part of
+  the error's contract, not a comment in implementation code.
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  errorCategorySchema:
+    title: Error category
+    description: >-
+      Symbolic class of error. Drives default mapping in generators (HTTP
+      status codes, gRPC codes, exception hierarchies) without forcing the
+      schema to know about transport-layer details. Lets callers reason about
+      retryability without parsing the id.
+    enum:
+      - not_found
+      - already_exists
+      - validation
+      - precondition_failed
+      - conflict
+      - unauthorized
+      - forbidden
+      - rate_limited
+      - quota_exceeded
+      - dependency_unavailable
+      - timeout
+      - internal
+      - cancelled
+      - unsupported
+
+  retryabilitySchema:
+    title: Retry guidance
+    description: >-
+      Caller-facing retry guidance. Drives generated retry policy and
+      caller-visible documentation alike.
+    enum:
+      - never
+      - safe
+      - after_backoff
+      - manual
+
+  recoverySchema:
+    title: Recovery hint
+    description: >-
+      Structured suggestion for how a caller should respond when this error
+      is raised. Generators can lower these into typed retry, fallback, or
+      escalation policies; documentation tooling can render them as
+      caller-facing guidance.
+    type: object
+    properties:
+      kind:
+        title: Recovery kind
+        enum:
+          - retry
+          - fallback
+          - escalate
+          - wait_for_event
+          - use_alternative
+      target:
+        title: Recovery target identifier
+        description: >-
+          Identifier referenced by the recovery hint. Interpretation depends
+          on `kind` -- a use-case id for use_alternative, an event id for
+          wait_for_event, etc.
+        $ref: "#/definitions/identifierSchema"
+      description:
+        title: Recovery description
+        description: Human-readable rationale and instruction for the recovery action.
+        type: string
+        minLength: 1
+    required:
+      - kind
+      - description
+
+  errorSchema:
+    title: Error definition
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Error display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Error description
+        description: >-
+          What this error means and what state of the world produces it.
+          Required so the failure surface is documented as part of the
+          contract, not as implementation-side commentary.
+        type: string
+        minLength: 1
+      category:
+        $ref: "#/definitions/errorCategorySchema"
+      payload:
+        title: Error payload
+        description: >-
+          Structured payload shipped with the error. Either a model id (or
+          list of model ids) describing the payload's shape.
+        oneOf:
+          - $ref: "#/definitions/identifierSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/identifierSchema"
+            minItems: 1
+            uniqueItems: true
+      condition:
+        title: Raise condition
+        description: >-
+          Predicate over the use-case input/output and entity state that
+          determines when this error is raised. Lets generators emit
+          branch-coverage tests automatically and keeps the failure
+          condition adjacent to the failure type.
+        $ref: "expression.meta.yaml"
+      retryable:
+        $ref: "#/definitions/retryabilitySchema"
+      recovery:
+        title: Recovery hints
+        description: Structured suggestions for callers responding to this error.
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/recoverySchema"
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+      - category
+
+allOf:
+  - $ref: "#/definitions/errorSchema"
+
+type: object
+default: true

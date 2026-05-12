@@ -1,0 +1,178 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/domain"
+title: Domain
+description: >-
+  A bounded context (in the Eric Evans sense): a named slice of the larger
+  system whose vocabulary, models, use cases, events, and permissions form a
+  coherent whole. Domains keep large DeepThought specifications navigable by
+  giving every entity a home and making cross-domain dependencies explicit.
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  identifierListSchema:
+    title: Identifier list
+    type: array
+    minItems: 1
+    uniqueItems: true
+    items:
+      $ref: "#/definitions/identifierSchema"
+
+  glossaryEntrySchema:
+    title: Glossary entry
+    description: >-
+      Pins the meaning of a domain term so prose documentation, code, and
+      tests share one definition. The antidote to "what does X mean here?".
+    type: object
+    properties:
+      term:
+        title: Term
+        type: string
+        minLength: 1
+      definition:
+        title: Definition
+        description: Authoritative meaning of the term within this domain.
+        type: string
+        minLength: 1
+      synonyms:
+        title: Synonyms
+        description: Alternate names for the same concept.
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+      relatedTerms:
+        title: Related terms
+        description: Adjacent terms that frequently co-occur with this one.
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+    required:
+      - term
+      - definition
+
+  importSchema:
+    title: Domain import
+    description: >-
+      Names what this domain consumes from another domain. Only entities
+      explicitly exported by the source domain may be imported -- this is
+      how cross-context dependencies are made explicit and reviewable.
+    type: object
+    properties:
+      from:
+        title: Source domain
+        $ref: "#/definitions/identifierSchema"
+      models:
+        title: Imported models
+        $ref: "#/definitions/identifierListSchema"
+      usecases:
+        title: Imported use cases
+        $ref: "#/definitions/identifierListSchema"
+      events:
+        title: Imported events
+        $ref: "#/definitions/identifierListSchema"
+      collections:
+        title: Imported collections
+        $ref: "#/definitions/identifierListSchema"
+      errors:
+        title: Imported errors
+        $ref: "#/definitions/identifierListSchema"
+    required:
+      - from
+
+  exportSchema:
+    title: Domain exports
+    description: >-
+      The public surface of this domain. Anything not listed is private to
+      the domain and may not be referenced from outside it.
+    type: object
+    properties:
+      models:
+        title: Exported models
+        $ref: "#/definitions/identifierListSchema"
+      usecases:
+        title: Exported use cases
+        $ref: "#/definitions/identifierListSchema"
+      events:
+        title: Exported events
+        $ref: "#/definitions/identifierListSchema"
+      collections:
+        title: Exported collections
+        $ref: "#/definitions/identifierListSchema"
+      errors:
+        title: Exported errors
+        $ref: "#/definitions/identifierListSchema"
+
+  domainSchema:
+    title: Domain
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Domain display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Domain description
+        description: >-
+          What this bounded context is responsible for and the slice of the
+          system its language and entities cover. Required so every domain
+          carries its own purpose statement inherent to its definition.
+        type: string
+        minLength: 1
+      owner:
+        title: Owner
+        description: >-
+          Team or individual accountable for this bounded context. Drives
+          CODEOWNERS-style routing and on-call surface area.
+        type: string
+        minLength: 1
+      classification:
+        title: Strategic classification
+        description: >-
+          Subdomain classification in the Evans taxonomy: core (the thing the
+          business wins on), supporting (necessary but not differentiating),
+          generic (commodity / off-the-shelf candidate).
+        enum:
+          - core
+          - supporting
+          - generic
+      glossary:
+        title: Glossary
+        description: Authoritative definitions of domain terms.
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/glossaryEntrySchema"
+      imports:
+        title: Imports
+        description: Cross-domain dependencies this domain takes on.
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/importSchema"
+      exports:
+        $ref: "#/definitions/exportSchema"
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+
+allOf:
+  - $ref: "#/definitions/domainSchema"
+
+type: object
+default: true

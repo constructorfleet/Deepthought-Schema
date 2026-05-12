@@ -1,0 +1,325 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/model"
+title: Model
+description: >-
+  A data structure consumed or returned by a Domain-Interfacing Use Case. A
+  model is the named composition of its fields together with the cross-field
+  invariants, lifecycle, persistence, references, and policies that together
+  describe its meaning -- everything a generator needs to scaffold the type,
+  the storage layer, and its tests.
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  fieldReferenceSchema:
+    title: Field reference
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  fieldListSchema:
+    title: Field list
+    description: One or more field identifiers from the surrounding model.
+    oneOf:
+      - $ref: "#/definitions/fieldReferenceSchema"
+      - type: array
+        items:
+          $ref: "#/definitions/fieldReferenceSchema"
+        minItems: 1
+        uniqueItems: true
+
+  identifierListSchema:
+    title: Identifier list
+    description: One or more entity identifiers.
+    oneOf:
+      - $ref: "#/definitions/identifierSchema"
+      - type: array
+        items:
+          $ref: "#/definitions/identifierSchema"
+        minItems: 1
+        uniqueItems: true
+
+  cardinalitySchema:
+    title: Cardinality
+    description: The cardinality of a reference between two models.
+    enum:
+      - one_to_one
+      - one_to_many
+      - many_to_one
+      - many_to_many
+
+  referenceSchema:
+    title: Cross-model reference
+    description: >-
+      Captures a relationship to another model: the cardinality, the local
+      field that holds the foreign key (when applicable), the inverse
+      relation name on the target, and the referential integrity policy.
+      Without these, generated code can't reason about joins, cascades, or
+      aggregate boundaries.
+    type: object
+    properties:
+      id:
+        title: Reference identifier
+        $ref: "#/definitions/identifierSchema"
+      target:
+        title: Target model identifier
+        $ref: "#/definitions/identifierSchema"
+      cardinality:
+        $ref: "#/definitions/cardinalitySchema"
+      via:
+        title: Foreign key field
+        description: Local field holding the foreign key, when applicable.
+        $ref: "#/definitions/fieldReferenceSchema"
+      inverseName:
+        title: Inverse relation name
+        description: Name the target model uses to refer back to this one.
+        $ref: "#/definitions/identifierSchema"
+      onDelete:
+        title: On-delete policy
+        description: Referential integrity policy applied when the target is deleted.
+        enum:
+          - cascade
+          - restrict
+          - nullify
+          - no_action
+        default: restrict
+      eager:
+        title: Eager loading
+        description: Whether navigating this reference loads the target automatically.
+        type: boolean
+        default: false
+      description:
+        title: Reference description
+        description: >-
+          What this relationship represents in the domain. Required so the
+          relationship's meaning travels with the reference itself.
+        type: string
+        minLength: 1
+    required:
+      - id
+      - target
+      - cardinality
+      - description
+
+  invariantSchema:
+    title: Cross-field invariant
+    description: >-
+      A domain rule that spans multiple fields ("shipped_at greater than or
+      equal to ordered_at", "total equals sum of line_items.amount").
+      Single-field constraints can't express these; declaring them as
+      invariants moves the rule out of code comments into the contract.
+    type: object
+    properties:
+      id:
+        title: Invariant identifier
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Invariant display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Invariant description
+        description: >-
+          What this invariant guarantees and the domain rationale behind
+          it. Required so the rule's intent stays inherent to the schema.
+        type: string
+        minLength: 1
+      assert:
+        title: Predicate
+        description: Predicate that must hold for an instance to be valid.
+        $ref: "expression.meta.yaml"
+      enforcement:
+        title: Enforcement window
+        description: >-
+          When the invariant must hold. `always` checks on every read and
+          write. `on_write` skips validation for in-flight reads from
+          legacy data. `in_state` restricts checks to specific lifecycle
+          states.
+        oneOf:
+          - enum:
+              - always
+              - on_write
+              - on_read
+          - type: object
+            properties:
+              in_state:
+                $ref: "#/definitions/identifierListSchema"
+            required:
+              - in_state
+      raises:
+        title: Error raised on violation
+        description: >-
+          Error to raise if the invariant fails. If omitted, generators
+          emit a default validation error type.
+        $ref: "#/definitions/identifierSchema"
+    required:
+      - id
+      - description
+      - assert
+
+  persistenceSchema:
+    title: Persistence
+    description: >-
+      Where instances of this model live. Drives generator decisions about
+      storage layer, repository scaffolding, and audit semantics.
+    type: object
+    properties:
+      kind:
+        title: Persistence kind
+        description: >-
+          stored = durably persisted in a store of record;
+          derived = projected from other models;
+          ephemeral = in-memory DTO, never persisted;
+          external = owned by an upstream system.
+        enum:
+          - stored
+          - derived
+          - ephemeral
+          - external
+      store:
+        title: Store identifier
+        description: Identifier of the store of record (for `stored`).
+        $ref: "#/definitions/identifierSchema"
+      sourcedFrom:
+        title: Source models
+        description: Source(s) the projection is built from (for `derived`).
+        $ref: "#/definitions/identifierListSchema"
+      retention:
+        title: Retention policy
+        description: Free-form retention guidance for stored data.
+        type: string
+        minLength: 1
+      auditTrail:
+        title: Maintain audit trail
+        description: Whether changes to instances are logged to an audit trail.
+        type: boolean
+        default: false
+    required:
+      - kind
+
+  fieldPolicySchema:
+    title: Field-level access policy
+    description: >-
+      Per-field read / write visibility rules. References permission ids
+      declared in permission.meta.yaml documents.
+    type: object
+    properties:
+      field:
+        $ref: "#/definitions/fieldReferenceSchema"
+      readableBy:
+        title: Read permissions
+        $ref: "#/definitions/identifierListSchema"
+      writableBy:
+        title: Write permissions
+        $ref: "#/definitions/identifierListSchema"
+    required:
+      - field
+
+  modelSchema:
+    title: Model
+    type: object
+    properties:
+      id:
+        title: Model identifier
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Model display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Model description
+        description: >-
+          What this model represents in the domain. Required so the
+          model's purpose is documented as part of its definition.
+        type: string
+        minLength: 1
+      fields:
+        title: Fields
+        description: Field references composing the model.
+        $ref: "#/definitions/fieldListSchema"
+      key:
+        title: Identity field(s)
+        description: >-
+          Field(s) that uniquely identify an instance. Use cases declared
+          with relation: key resolve their inputKey/outputKey against
+          this.
+        $ref: "#/definitions/fieldListSchema"
+      queryable:
+        title: Queryable fields
+        description: >-
+          Fields by which instances can be filtered but that don't
+          uniquely identify an instance. Use cases declared with
+          relation: query validate their filter fields against this. The
+          literal `true` declares all fields queryable.
+        oneOf:
+          - $ref: "#/definitions/fieldListSchema"
+          - const: true
+      extends:
+        title: Parent model
+        description: Identifier of a model this one extends.
+        $ref: "#/definitions/identifierSchema"
+      domain:
+        title: Bounded context
+        description: >-
+          Bounded context this model belongs to. Inherits from the
+          surrounding document if omitted.
+        $ref: "#/definitions/identifierSchema"
+      references:
+        title: Cross-model references
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/referenceSchema"
+      invariants:
+        title: Cross-field invariants
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/invariantSchema"
+      stateMachine:
+        title: Lifecycle state machine
+        description: >-
+          Either an inline state machine or a reference to one defined in
+          its own state_machine.meta.yaml document.
+        oneOf:
+          - $ref: "#/definitions/identifierSchema"
+          - $ref: "state_machine.meta.yaml#/definitions/stateMachineSchema"
+      persistence:
+        $ref: "#/definitions/persistenceSchema"
+      readableBy:
+        title: Model-level read permissions
+        $ref: "#/definitions/identifierListSchema"
+      writableBy:
+        title: Model-level write permissions
+        $ref: "#/definitions/identifierListSchema"
+      fieldPolicies:
+        title: Field-level access policies
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/fieldPolicySchema"
+      sensitivity:
+        title: Aggregate sensitivity
+        description: >-
+          Default sensitivity classification for the model. Field-level
+          sensitivity on individual fields takes precedence.
+        $ref: "field.meta.yaml#/definitions/sensitivitySchema"
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+      - fields
+
+allOf:
+  - $ref: "#/definitions/modelSchema"
+
+type: object
+default: true

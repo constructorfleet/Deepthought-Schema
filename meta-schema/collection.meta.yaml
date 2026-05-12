@@ -1,0 +1,243 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/collection"
+title: Collection
+description: >-
+  A named, finite set of typed values that share a common kind: every entry is
+  either a scalar of the same dataType + unit (an enum-of-quantities) or an
+  instance of the same model (an enum-of-records). Collections are first-class
+  outputs of data-retrieval use cases (relation: key / relation: query) and
+  can be referenced as the input or output of a use case the same way models
+  are.
+
+definitions:
+  fieldTypes:
+    title: Primitive data type
+    description: The primitive datatype of a scalar collection's entries.
+    type: string
+    enum:
+      - array
+      - boolean
+      - integer
+      - number
+      - string
+
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  entryHeaderSchema:
+    title: Collection entry header
+    description: >-
+      Common header on every entry: a stable id used as the lookup key, a
+      required display name and description, and an optional symbol.
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Entry display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z0-9][a-zA-Z0-9 ]+$"
+      description:
+        title: Entry description
+        description: >-
+          What this entry represents. Required so collection members are
+          documented inherent to the entry, not in surrounding prose.
+        type: string
+        minLength: 1
+      symbol:
+        title: Entry symbol
+        description: Optional short symbol or abbreviation for the entry.
+        type: string
+        minLength: 1
+    required:
+      - id
+      - name
+      - description
+
+  scalarEntryValueSchema:
+    title: Scalar entry value shape
+    description: >-
+      Shape-checks each entry's value against the parent collection's
+      declared dataType. Mirrors the value-shape contract used in
+      constant.meta.yaml so booleans, numbers, strings, and arrays remain
+      well-typed across the collection.
+    allOf:
+      - if:
+          properties:
+            dataType:
+              const: boolean
+        then:
+          properties:
+            values:
+              type: array
+              items:
+                allOf:
+                  - $ref: "#/definitions/entryHeaderSchema"
+                  - properties:
+                      value:
+                        type: boolean
+                    required:
+                      - value
+      - if:
+          properties:
+            dataType:
+              anyOf:
+                - const: integer
+                - const: number
+        then:
+          properties:
+            values:
+              type: array
+              items:
+                allOf:
+                  - $ref: "#/definitions/entryHeaderSchema"
+                  - properties:
+                      value:
+                        $ref: "field.meta.yaml#/definitions/valueExpressionSchema"
+                    required:
+                      - value
+      - if:
+          properties:
+            dataType:
+              const: string
+        then:
+          properties:
+            values:
+              type: array
+              items:
+                allOf:
+                  - $ref: "#/definitions/entryHeaderSchema"
+                  - properties:
+                      value:
+                        type: string
+                        minLength: 1
+                    required:
+                      - value
+      - if:
+          properties:
+            dataType:
+              const: array
+        then:
+          properties:
+            values:
+              type: array
+              items:
+                allOf:
+                  - $ref: "#/definitions/entryHeaderSchema"
+                  - properties:
+                      value:
+                        type: array
+                    required:
+                      - value
+
+  scalarCollectionSchema:
+    title: Scalar collection
+    description: >-
+      Enum-of-quantities. Every entry is a single typed value sharing the
+      collection's dataType (and unit, when the dataType supports units).
+    allOf:
+      - $ref: "#/definitions/scalarEntryValueSchema"
+      - properties:
+          kind:
+            const: scalar
+          dataType:
+            $ref: "#/definitions/fieldTypes"
+          unit:
+            title: Shared unit
+            description: >-
+              Unit shared by every entry. Required when the dataType
+              supports units; omitted for booleans, strings, and arrays.
+            oneOf:
+              - $ref: "unit.meta.yaml#/definitions/unitIdentifierSchema"
+              - $ref: "unit.meta.yaml#/definitions/unitSchema"
+              - $ref: "unit.meta.yaml#/definitions/unitGroupSchema"
+          values:
+            title: Entries
+            type: array
+            minItems: 1
+            uniqueItems: true
+        required:
+          - kind
+          - dataType
+          - values
+
+  modelCollectionSchema:
+    title: Model collection
+    description: >-
+      Enum-of-records. Every entry is an instance of the named model. The
+      collection's key field is what callers use to look an entry up;
+      defaults to the model's declared key.
+    properties:
+      kind:
+        const: model
+      model:
+        title: Element model identifier
+        $ref: "#/definitions/identifierSchema"
+      key:
+        title: Lookup key
+        description: >-
+          Field on the element model that callers use to look up entries.
+          Defaults to the model's declared key when omitted.
+        oneOf:
+          - $ref: "#/definitions/identifierSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/identifierSchema"
+            minItems: 1
+            uniqueItems: true
+      values:
+        title: Entries
+        type: array
+        minItems: 1
+        items:
+          allOf:
+            - $ref: "#/definitions/entryHeaderSchema"
+            - properties:
+                value:
+                  type: object
+              required:
+                - value
+    required:
+      - kind
+      - model
+      - values
+
+  collectionSchema:
+    title: Collection
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Collection display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Collection description
+        description: >-
+          What this collection represents and why its entries belong
+          together. Required so the collection's purpose stays inherent to
+          its definition.
+        type: string
+        minLength: 1
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+      - kind
+      - values
+    oneOf:
+      - $ref: "#/definitions/scalarCollectionSchema"
+      - $ref: "#/definitions/modelCollectionSchema"
+
+allOf:
+  - $ref: "#/definitions/collectionSchema"
+
+type: object
+default: true

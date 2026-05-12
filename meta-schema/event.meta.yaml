@@ -1,0 +1,105 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/event"
+title: Event
+description: >-
+  A fact -- something that happened in the domain -- emitted by a use case for
+  downstream consumers (audit logs, event streams, projections, integrations).
+  Declaring events makes the audit/event surface a first-class part of the
+  contract instead of code archaeology.
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  deliverySchema:
+    title: Delivery semantics
+    description: >-
+      When the event is emitted relative to the use-case execution and what
+      consistency guarantee the broker provides. The chosen mode shapes the
+      generated producer / consumer scaffolding.
+    enum:
+      - synchronous
+      - transactional
+      - at_least_once
+      - at_most_once
+      - eventual
+
+  eventSchema:
+    title: Event definition
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Event display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Event description
+        description: >-
+          What the event signals about the domain and the conditions under
+          which it is emitted. Required so consumers can understand the
+          event without reading producer code.
+        type: string
+        minLength: 1
+      schema_version:
+        title: Payload schema version
+        description: >-
+          Monotonic integer incremented on breaking payload changes.
+          Independent of the event's lifecycle metadata so consumers can
+          version schema evolution without confusing it with deprecation.
+        type: integer
+        minimum: 1
+      payload:
+        title: Event payload
+        description: >-
+          Payload model(s) carried by the event. Use the literal `none` for
+          a marker event with no payload.
+        oneOf:
+          - const: none
+          - $ref: "#/definitions/identifierSchema"
+          - type: array
+            items:
+              $ref: "#/definitions/identifierSchema"
+            minItems: 1
+            uniqueItems: true
+      delivery:
+        $ref: "#/definitions/deliverySchema"
+      aggregate:
+        title: Aggregate root
+        description: >-
+          The aggregate / entity whose state change this event reports.
+          Drives partition-key selection in generated stream producers.
+        $ref: "#/definitions/identifierSchema"
+      topic:
+        title: Routing topic
+        description: >-
+          Routing topic / channel hint for generators that target a message
+          broker (Kafka topic, NATS subject, SQS queue, etc.).
+        type: string
+        minLength: 1
+      ordered:
+        title: Ordering required
+        description: >-
+          Whether subscribers must process this event in emission order
+          within an aggregate. Drives partition + consumer config.
+        type: boolean
+        default: false
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+      - schema_version
+      - payload
+
+allOf:
+  - $ref: "#/definitions/eventSchema"
+
+type: object
+default: true

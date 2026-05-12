@@ -1,0 +1,267 @@
+$schema: "https://json-schema.org/draft/07/schema"
+$id: "https://teagantotally.rocks/deepthought/meta/scenario"
+title: Scenario
+description: >-
+  Given/When/Then acceptance specification for a use case. Each scenario is
+  simultaneously human-readable documentation, a generated BDD test, and a
+  worked example for downstream consumers. Multiple scenarios per use case
+  capture the happy path, edge cases, and error cases as a single contract.
+
+definitions:
+  identifierSchema:
+    title: Identifier
+    type: string
+    minLength: 1
+    pattern: "^[a-z][a-z_]+[a-z]$"
+
+  givenStatementSchema:
+    title: Given - prose statement
+    description: >-
+      Free-form prose precondition for cases that don't lend themselves to
+      structured assertions. Always allowed; structured forms are preferred
+      where they fit.
+    type: object
+    properties:
+      statement:
+        title: Statement
+        type: string
+        minLength: 1
+    required:
+      - statement
+
+  givenStateSchema:
+    title: Given - model is in state
+    description: A model instance is currently in a particular state-machine state.
+    type: object
+    properties:
+      model:
+        title: Model identifier
+        $ref: "#/definitions/identifierSchema"
+      state:
+        title: State identifier
+        $ref: "#/definitions/identifierSchema"
+    required:
+      - model
+      - state
+
+  givenExistsSchema:
+    title: Given - instance exists
+    description: An instance of the named model exists with the supplied field values.
+    type: object
+    properties:
+      exists:
+        title: Model identifier
+        $ref: "#/definitions/identifierSchema"
+      values:
+        title: Seed values
+        description: Field values applied to the seeded instance.
+        type: object
+    required:
+      - exists
+
+  givenAssertSchema:
+    title: Given - predicate
+    description: An arbitrary predicate that must hold over the world state before the use case runs.
+    type: object
+    properties:
+      assert:
+        $ref: "expression.meta.yaml"
+    required:
+      - assert
+
+  givenActorSchema:
+    title: Given - calling actor
+    description: The actor invoking the use case in this scenario.
+    type: object
+    properties:
+      actor:
+        title: Actor identifier
+        $ref: "#/definitions/identifierSchema"
+    required:
+      - actor
+
+  givenSchema:
+    title: Given clause
+    description: A single precondition. Compose multiple in the scenario's `given` array.
+    oneOf:
+      - $ref: "#/definitions/givenStatementSchema"
+      - $ref: "#/definitions/givenStateSchema"
+      - $ref: "#/definitions/givenExistsSchema"
+      - $ref: "#/definitions/givenAssertSchema"
+      - $ref: "#/definitions/givenActorSchema"
+
+  whenSchema:
+    title: When clause
+    description: The input(s) supplied to the use case under test, plus the calling actor.
+    type: object
+    properties:
+      input:
+        title: Use-case input(s)
+        oneOf:
+          - type: object
+          - type: array
+            items:
+              type: object
+            minItems: 1
+      actor:
+        title: Calling actor identifier
+        $ref: "#/definitions/identifierSchema"
+    required:
+      - input
+
+  thenOutputSchema:
+    title: Then - expected output
+    description: The output value(s) returned by the use case on success.
+    type: object
+    properties:
+      output:
+        oneOf:
+          - type: object
+          - type: array
+    required:
+      - output
+
+  thenRaisesSchema:
+    title: Then - error raised
+    description: An error is raised; payload optionally pinned for assertion.
+    type: object
+    properties:
+      raises:
+        title: Error identifier
+        $ref: "#/definitions/identifierSchema"
+      payload:
+        title: Expected error payload
+        type: object
+    required:
+      - raises
+
+  thenEmitsSchema:
+    title: Then - event emitted
+    description: An event is emitted by the use case; payload optionally pinned.
+    type: object
+    properties:
+      emits:
+        title: Event identifier
+        $ref: "#/definitions/identifierSchema"
+      payload:
+        title: Expected event payload
+        type: object
+    required:
+      - emits
+
+  thenTransitionsSchema:
+    title: Then - state transition
+    description: A target model transitions from one lifecycle state to another.
+    type: object
+    properties:
+      transitions:
+        title: Transition identifier
+        $ref: "#/definitions/identifierSchema"
+      model:
+        title: Affected model identifier
+        $ref: "#/definitions/identifierSchema"
+      to:
+        title: Destination state identifier
+        $ref: "#/definitions/identifierSchema"
+    required:
+      - transitions
+      - to
+
+  thenAssertSchema:
+    title: Then - predicate
+    description: An arbitrary predicate that must hold after the use case runs.
+    type: object
+    properties:
+      assert:
+        $ref: "expression.meta.yaml"
+    required:
+      - assert
+
+  thenStatementSchema:
+    title: Then - prose statement
+    description: Free-form expected outcome.
+    type: object
+    properties:
+      statement:
+        title: Statement
+        type: string
+        minLength: 1
+    required:
+      - statement
+
+  thenSchema:
+    title: Then clause
+    description: A single expected outcome. Compose multiple in the scenario's `then` array.
+    oneOf:
+      - $ref: "#/definitions/thenOutputSchema"
+      - $ref: "#/definitions/thenRaisesSchema"
+      - $ref: "#/definitions/thenEmitsSchema"
+      - $ref: "#/definitions/thenTransitionsSchema"
+      - $ref: "#/definitions/thenAssertSchema"
+      - $ref: "#/definitions/thenStatementSchema"
+
+  scenarioSchema:
+    title: Scenario
+    type: object
+    properties:
+      id:
+        $ref: "#/definitions/identifierSchema"
+      name:
+        title: Scenario display name
+        type: string
+        minLength: 1
+        pattern: "^[A-Z][a-zA-Z ]+$"
+      description:
+        title: Scenario description
+        description: >-
+          What aspect of the use case this scenario pins down (happy path,
+          specific edge case, specific error). Required so each scenario's
+          intent stays inherent to the spec.
+        type: string
+        minLength: 1
+      tags:
+        title: Suite tags
+        description: >-
+          Tags that organize generated test suites: smoke, regression,
+          negative, security, golden, etc.
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          minLength: 1
+          pattern: "^[a-z][a-z_-]*$"
+      usecase:
+        title: Use case under test
+        description: >-
+          The use case under test. Optional when the scenario is embedded
+          inline on a use case definition; otherwise required.
+        $ref: "#/definitions/identifierSchema"
+      given:
+        title: Given clauses
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/givenSchema"
+      when:
+        $ref: "#/definitions/whenSchema"
+      then:
+        title: Then clauses
+        type: array
+        minItems: 1
+        items:
+          $ref: "#/definitions/thenSchema"
+      lifecycle:
+        $ref: "field.meta.yaml#/definitions/lifecycleSchema"
+    required:
+      - id
+      - name
+      - description
+      - when
+      - then
+
+allOf:
+  - $ref: "#/definitions/scenarioSchema"
+
+type: object
+default: true
