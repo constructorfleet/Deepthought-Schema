@@ -1,0 +1,147 @@
+name: Quality and release
+
+on:
+  push: {}
+  pull_request: {}
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out source
+        uses: actions/checkout@v4
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install project and test runner
+        run: python -m pip install --editable . pytest==8.4.2
+      - name: Run tests
+        run: python -m pytest -q
+
+  detect-release:
+    needs: quality
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' }}
+    runs-on: ubuntu-latest
+    outputs:
+      release: ${{ steps.detect.outputs.release }}
+      tag: ${{ steps.detect.outputs.tag }}
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Detect an unpublished changelog version
+        id: detect
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ ! -f CHANGELOG.md ]]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          version="$(sed -nE 's/^## \[?v?([0-9]+\.[0-9]+\.[0-9]+)\]?.*/\1/p' CHANGELOG.md | head -n 1)"
+          if [[ ! "$version" =~ ^[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          tag="v$version"
+          remote_tag="$(git ls-remote origin "refs/tags/$tag")"
+          if [[ -n "$remote_tag" ]]; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+            echo "tag=$tag" >> "$GITHUB_OUTPUT"
+          fi
+
+  maintain-release-pr:
+    needs: [quality, detect-release]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-release.outputs.release != 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out full history
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITEA_TOKEN }}
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check for releasable Conventional Commits
+        id: commits
+        shell: bash
+        run: |
+          set -euo pipefail
+          latest_tag="$(git tag --list 'v[0-9]*' --sort=-version:refname | head -n 1)"
+          if [[ -n "$latest_tag" ]]; then
+            range="$latest_tag..HEAD"
+            commit_messages="$(git log "$range" --format=%B)"
+          else
+            commit_messages="$(git log --format=%B)"
+          fi
+          if printf '%s\n' "$commit_messages" | grep -Eq '^(feat|feature|fix|perf)(\([^)]*\))?!?: .+|^[a-z][a-z0-9-]*(\([^)]*\))?!: .+|^BREAKING CHANGE:|^BREAKING-CHANGE:|^Release-As:'; then
+            echo "releaseable=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "releaseable=false" >> "$GITHUB_OUTPUT"
+          fi
+      - name: Fetch existing release branch
+        if: ${{ steps.commits.outputs.releaseable == 'true' }}
+        shell: bash
+        run: |
+          branch=release-please--branches--main
+          if git ls-remote --exit-code --heads origin "$branch" > /dev/null; then
+            git fetch origin "+refs/heads/$branch:refs/remotes/origin/$branch"
+          fi
+      - name: Maintain release PR
+        id: release
+        if: ${{ steps.commits.outputs.releaseable == 'true' }}
+        uses: self:constructorfleet/release-please@v17.1.3
+        with:
+          mode: plan
+          token: ${{ secrets.GITEA_TOKEN }}
+          server-url: ${{ github.server_url }}
+          repository: ${{ github.repository }}
+          default-branch: main
+          target-branch: main
+          initial-version: 0.1.0
+          include-v-in-tag: true
+          git-author-name: release-please[bot]
+          git-author-email: release-please@example.com
+      - name: Synchronize Python package version in release PR
+        if: ${{ steps.release.outputs.skipped != 'true' && steps.release.outputs.version != '' }}
+        shell: bash
+        env:
+          RELEASE_VERSION: ${{ steps.release.outputs.version }}
+        run: |
+          set -euo pipefail
+          python .gitea/scripts/sync_project_version.py "$RELEASE_VERSION"
+          if git diff --quiet -- pyproject.toml; then
+            exit 0
+          fi
+          git config user.name "release-please[bot]"
+          git config user.email "release-please@example.com"
+          git add pyproject.toml
+          git commit -m "chore: sync Python package version to $RELEASE_VERSION"
+          git push origin HEAD:release-please--branches--main
+
+  publish-release:
+    needs: [quality, detect-release]
+    if: ${{ github.event_name == 'push' && github.ref == 'refs/heads/main' && needs.detect-release.outputs.release == 'true' }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out merged release commit
+        uses: actions/checkout@v4
+      - name: Set up Node.js 24
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Create or sync Gitea release
+        uses: self:constructorfleet/release-please@v17.1.3
+        with:
+          mode: release
+          release-tag: ${{ needs.detect-release.outputs.tag }}
+          token: ${{ secrets.GITEA_TOKEN }}
+          server-url: ${{ github.server_url }}
+          repository: ${{ github.repository }}
+          default-branch: main
