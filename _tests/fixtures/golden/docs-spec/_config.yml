@@ -1,0 +1,7 @@
+title: Domain Reference
+description: DeepThought domain spec
+theme: jekyll-theme-cayman
+markdown: kramdown
+kramdown:
+  syntax_highlighter: rouge
+  parse_block_html: true

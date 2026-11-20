@@ -1,0 +1,50 @@
+{
+  "counts": {
+    "scenarios": 1,
+    "invariants": 1
+  },
+  "scenarios": [
+    {
+      "id": "get_thing_happy_path",
+      "name": "Get Thing Happy Path",
+      "description": "Reading a known thing succeeds.",
+      "usecase": "get_thing",
+      "tags": [
+        "smoke"
+      ],
+      "source": "source: `scenario/get_thing_happy_path.yaml`",
+      "given": [
+        {
+          "actor": "pantry_owner"
+        }
+      ],
+      "when": {
+        "input": {
+          "thing_id": "abc"
+        }
+      },
+      "then": [
+        {
+          "output": {
+            "thing_id": "abc",
+            "thing_name": "Example"
+          }
+        }
+      ]
+    }
+  ],
+  "invariants": [
+    {
+      "id": "thing_name_present",
+      "name": "Thing Name Present",
+      "description": "Every thing has a name.",
+      "model": "thing",
+      "source": "source: `model/thing.yaml`",
+      "assert": {
+        "field": "thing_name"
+      },
+      "enforcement": "always",
+      "raises": null
+    }
+  ]
+}

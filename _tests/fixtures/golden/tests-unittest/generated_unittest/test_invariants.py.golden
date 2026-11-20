@@ -1,0 +1,30 @@
+"""Generated unittest stubs from a validated DeepThought catalog."""
+
+from generated_unittest.payloads import GeneratedInvariant
+import unittest
+
+
+class GeneratedInvariantTests(unittest.TestCase):
+    def test_invariant_thing_thing_name_present(self):
+        """Invariant: Thing Name Present
+
+model: thing
+source: 'source: `model/thing.yaml`'
+assertion:
+  field: thing_name
+enforcement: always
+raises: null
+"""
+        invariant = GeneratedInvariant(
+            model='thing',
+            source='source: `model/thing.yaml`',
+            assertion={'field': 'thing_name'},
+            enforcement='always',
+            raises=None,
+        )
+        self.assertIsNotNone(invariant)
+        self.skipTest("Generated invariant stub: connect this to a concrete model validator")
+
+
+if __name__ == "__main__":
+    unittest.main()

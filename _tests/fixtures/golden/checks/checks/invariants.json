@@ -1,0 +1,14 @@
+[
+  {
+    "id": "thing_name_present",
+    "name": "Thing Name Present",
+    "model": "thing",
+    "description": "Every thing has a name.",
+    "assert": {
+      "field": "thing_name"
+    },
+    "enforcement": "always",
+    "raises": null,
+    "source": "model/thing.yaml"
+  }
+]

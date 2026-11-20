@@ -1,0 +1,19 @@
+[
+  {
+    "id": "publish_thing",
+    "name": "Publish Thing",
+    "state_machine": "thing_lifecycle",
+    "target": "thing",
+    "description": "Publish a thing.",
+    "from": "draft",
+    "to": "published",
+    "via": [
+      "get_thing"
+    ],
+    "guard": null,
+    "emits": [
+      "thing_read"
+    ],
+    "source": "state_machine/thing_lifecycle.yaml"
+  }
+]

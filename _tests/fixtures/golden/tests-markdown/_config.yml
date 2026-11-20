@@ -1,0 +1,7 @@
+title: Generated Test Plan
+description: DeepThought generated test plan
+theme: jekyll-theme-cayman
+markdown: kramdown
+kramdown:
+  syntax_highlighter: rouge
+  parse_block_html: true

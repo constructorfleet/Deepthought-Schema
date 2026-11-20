@@ -1,0 +1,33 @@
+"""Generated unittest stubs from a validated DeepThought catalog."""
+
+from generated_unittest.payloads import GeneratedScenario
+import unittest
+
+
+class GeneratedScenarioTests(unittest.TestCase):
+    def test_scenario_get_thing_happy_path(self):
+        """Scenario: Get Thing Happy Path
+
+source: 'source: `scenario/get_thing_happy_path.yaml`'
+given:
+- actor: pantry_owner
+when:
+  input:
+    thing_id: abc
+then:
+- output:
+    thing_id: abc
+    thing_name: Example
+"""
+        scenario = GeneratedScenario(
+            source='source: `scenario/get_thing_happy_path.yaml`',
+            given=[{'actor': 'pantry_owner'}],
+            when={'input': {'thing_id': 'abc'}},
+            then=[{'output': {'thing_id': 'abc', 'thing_name': 'Example'}}],
+        )
+        self.assertIsNotNone(scenario)
+        self.skipTest("Generated scenario stub: connect this to a concrete use-case runner")
+
+
+if __name__ == "__main__":
+    unittest.main()

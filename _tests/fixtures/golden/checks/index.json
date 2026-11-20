@@ -1,0 +1,14 @@
+{
+  "counts": {
+    "scenarios": 1,
+    "invariants": 1,
+    "permission_rules": 1,
+    "transitions": 1
+  },
+  "files": [
+    "invariants.json",
+    "permission_rules.json",
+    "scenarios.json",
+    "transitions.json"
+  ]
+}

@@ -1,0 +1,12 @@
+[
+  {
+    "permission": "read_inventory",
+    "permission_set": "inventory_access",
+    "rule_index": 1,
+    "effect": "allow",
+    "actors": "pantry_owner",
+    "condition": null,
+    "description": "Owners may read inventory.",
+    "source": "permission/inventory_access.yaml#inventory_access"
+  }
+]

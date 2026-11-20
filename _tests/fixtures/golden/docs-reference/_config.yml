@@ -1,0 +1,7 @@
+title: DeepThought Schema
+description: Documentation-Driven Development specification language
+theme: jekyll-theme-cayman
+markdown: kramdown
+kramdown:
+  syntax_highlighter: rouge
+  parse_block_html: true
