@@ -3,8 +3,8 @@
 This report records the tools configured at the M0 baseline and the checks run
 for the M0 implementation. The baseline source revision is
 `476d9dba5647433c2362c67e35e246d0f0d23a23` (`Add built-in generators for checks
-and docs`). The report's implementation revision is filled in when the M0
-branches are integrated.
+and docs`). The integrated M0 implementation revision for the run below is
+`277558320a09b033916145e7bdbd416025013b17`.
 
 ## Configured checks at baseline
 
@@ -33,11 +33,11 @@ python -m pytest -q
 ```
 
 Recorded local runner environment: CPython `3.12.16`, pip `26.2.2`, pytest
-`8.4.2`. The commands were executed in a disposable Python 3.12 virtual
-environment. Result on the M0 release-flow branch before final integration:
-`22 passed, 1 warning` (exit status 0). The warning is the existing
-`jsonschema.RefResolver` deprecation. The final integrated run and commit are
-recorded below after integration.
+`8.4.2`. The commands were executed in disposable Python 3.12 virtual
+environment `/tmp/deepthought-m0-final-venv` on integrated revision
+`277558320a09b033916145e7bdbd416025013b17`. The install command exited 0; the
+test command exited 0 with `23 passed, 1 warning in 3.26s`. The warning is the
+existing `jsonschema.RefResolver` deprecation at `src/deepthought/validate.py:28`.
 
 No formatter, type checker, build/package, security, or dependency scan is
 configured by the repository or the M0 workflow. Their status is **not
@@ -79,5 +79,37 @@ unit tested. Do not treat that as a live release-flow pass.
 
 ## Final integrated verification
 
-This section is to be completed against the integration commit and records the
-exact runner output, command exit codes, tool versions, and evidence location.
+The following supplemental checks were run on the same integrated revision:
+
+| Command | Tool version | Result |
+| --- | --- | --- |
+| `/tmp/deepthought-m0-final-venv/bin/python -m _tests.update_golden_fixtures` | CPython 3.12.16; project dependencies from editable install | Exit 0; double generation completed and updated zero tracked files |
+| `actionlint .gitea/workflows/release.yml` | actionlint 1.7.12 (Homebrew build, Go 1.26.3, darwin/arm64) | Exit 0 |
+| Python YAML parse of `.gitea/workflows/release.yml` | PyYAML 6.0.3 | Exit 0; all four jobs parsed |
+| `bash -n` on the embedded release-detection script | system Bash | Exit 0 |
+| `git diff --check -- ':(exclude)_tests/fixtures/golden/**'` | git from local environment | Exit 0 |
+
+Evidence paths: `_tests/test_golden_compatibility.py`,
+`_tests/fixtures/golden/`, `.gitea/workflows/release.yml`,
+`_tests/test_release_version_sync.py`, and this report. `git diff --check`
+over golden blobs reports generator-emitted trailing blank lines; see the
+compatibility section above. These exact-output files are intentionally not
+normalized.
+
+The workflow itself has not run on a Gitea Actions runner. In particular, the
+release action's authenticated PR/release operations remain unverified until
+`GITEA_TOKEN` and the Gitea runner are available to that repository. Static
+workflow validation and local Python tests do not claim that these remote
+operations succeeded.
+
+An independent review found no blocking fixture or implementation findings.
+The reviewer confirmed exact byte and path comparison, two-generation fixture
+stability checks, inert `.py.golden` generated test stubs, and representative
+coverage across the current generators. The review also identified a hosting
+boundary: the source upstream is GitHub `constructorfleet/Deepthought-Schema`,
+but the configured `self:constructorfleet/release-please` action runs on
+Gitea. The queried Gitea organization has no `Deepthought-Schema` repository;
+`teagan42/Deepthought` is the separate planning/issues repository. Therefore a
+GitHub PR can carry the Gitea workflow configuration, but GitHub Actions will
+not execute it. The Gitea release flow becomes operational only when the code
+is hosted on Gitea and the required runner/secret are configured.
