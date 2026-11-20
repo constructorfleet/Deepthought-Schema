@@ -3,8 +3,8 @@
 This report records the tools configured at the M0 baseline and the checks run
 for the M0 implementation. The baseline source revision is
 `476d9dba5647433c2362c67e35e246d0f0d23a23` (`Add built-in generators for checks
-and docs`). The integrated M0 implementation revision for the run below is
-`277558320a09b033916145e7bdbd416025013b17`.
+and docs`). The integrated M0 implementation revision verified below is
+`087c76ab77ff6866253f6421b062c4131d7b2929`.
 
 ## Configured checks at baseline
 
@@ -35,8 +35,8 @@ python -m pytest -q
 Recorded local runner environment: CPython `3.12.16`, pip `26.2.2`, pytest
 `8.4.2`. The commands were executed in disposable Python 3.12 virtual
 environment `/tmp/deepthought-m0-final-venv` on integrated revision
-`277558320a09b033916145e7bdbd416025013b17`. The install command exited 0; the
-test command exited 0 with `23 passed, 1 warning in 3.26s`. The warning is the
+`087c76ab77ff6866253f6421b062c4131d7b2929`. The install command exited 0; the
+test command exited 0 with `23 passed, 1 warning in 2.36s`. The warning is the
 existing `jsonschema.RefResolver` deprecation at `src/deepthought/validate.py:28`.
 
 No formatter, type checker, build/package, security, or dependency scan is
@@ -86,7 +86,7 @@ The following supplemental checks were run on the same integrated revision:
 | `/tmp/deepthought-m0-final-venv/bin/python -m _tests.update_golden_fixtures` | CPython 3.12.16; project dependencies from editable install | Exit 0; double generation completed and updated zero tracked files |
 | `actionlint .gitea/workflows/release.yml` | actionlint 1.7.12 (Homebrew build, Go 1.26.3, darwin/arm64) | Exit 0 |
 | Python YAML parse of `.gitea/workflows/release.yml` | PyYAML 6.0.3 | Exit 0; all four jobs parsed |
-| `bash -n` on the embedded release-detection script | system Bash | Exit 0 |
+| Python `bash -n` loop over every workflow `run` script | system Bash | Exit 0 |
 | `git diff --check -- ':(exclude)_tests/fixtures/golden/**'` | git from local environment | Exit 0 |
 
 Evidence paths: `_tests/test_golden_compatibility.py`,
