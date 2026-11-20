@@ -1,0 +1,7 @@
+usage: deepthought schemas [-h]
+
+Print the directory containing every DeepThought meta-schema. Useful for
+editor LSP integration and external validators.
+
+options:
+  -h, --help  show this help message and exit

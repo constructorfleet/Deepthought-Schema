@@ -1,0 +1,14 @@
+usage: deepthought validate [-h] [--schemas SCHEMAS] root
+
+Validate every YAML file under <root> against the appropriate meta-schema. The
+kind is inferred from a containing subdirectory name (examples/field/...) or a
+filename suffix (foo.field.yaml).
+
+positional arguments:
+  root               directory of YAML to validate
+
+options:
+  -h, --help         show this help message and exit
+  --schemas SCHEMAS  directory of meta-schemas to validate against; defaults
+                     to the canonical meta-schema/ directory bundled with
+                     deepthought

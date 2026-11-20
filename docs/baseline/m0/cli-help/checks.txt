@@ -1,0 +1,11 @@
+usage: deepthought checks [-h] {build} ...
+
+Generate catalog-backed JSON manifests for correctness checks, including
+scenarios, invariants, permission rules, and state machine transitions.
+
+positional arguments:
+  {build}
+    build     Generate JSON correctness manifests.
+
+options:
+  -h, --help  show this help message and exit

@@ -1,0 +1,14 @@
+usage: deepthought checks build [-h] [--schemas SCHEMAS] [--spec SPEC]
+                                [--out OUT] [--clean]
+
+Generate JSON manifests from the validated spec catalog so downstream tooling
+can consume correctness checks without reparsing YAML.
+
+options:
+  -h, --help         show this help message and exit
+  --schemas SCHEMAS  directory of meta-schemas to validate against. Defaults
+                     to the canonical meta-schema directory.
+  --spec SPEC        directory of consumer YAML to render into correctness
+                     manifests.
+  --out OUT          output directory (default: ./checks)
+  --clean            wipe <out> before building

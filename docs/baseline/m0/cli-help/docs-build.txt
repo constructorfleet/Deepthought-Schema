@@ -1,0 +1,25 @@
+usage: deepthought docs build [-h] [--mode {reference,spec}]
+                              [--schemas SCHEMAS] [--examples EXAMPLES]
+                              [--spec SPEC] [--out OUT] [--title TITLE]
+                              [--clean]
+
+Generate a static site under <out>. In `reference` mode the input is a
+directory of JSON Schema documents; in `spec` mode the input is a directory of
+consumer YAML conforming to the DeepThought meta-schemas.
+
+options:
+  -h, --help            show this help message and exit
+  --mode {reference,spec}
+                        reference: render schema docs (default). spec: render
+                        domain docs.
+  --schemas SCHEMAS     reference mode: directory of meta-schemas to render.
+                        spec mode: directory of meta-schemas to validate
+                        against. Defaults to the canonical meta-schema
+                        directory.
+  --examples EXAMPLES   reference mode: directory of YAML examples to validate
+                        and embed.
+  --spec SPEC           spec mode: directory of consumer YAML to render.
+  --out OUT             output directory (default: ./docs)
+  --title TITLE         page title (default: 'DeepThought Schema' in reference
+                        mode)
+  --clean               wipe <out> before building

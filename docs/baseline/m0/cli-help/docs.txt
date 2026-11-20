@@ -1,0 +1,10 @@
+usage: deepthought docs [-h] {build} ...
+
+Generate Markdown documentation from meta-schemas or specs.
+
+positional arguments:
+  {build}
+    build     Generate a Markdown documentation site.
+
+options:
+  -h, --help  show this help message and exit

@@ -1,0 +1,27 @@
+usage: deepthought tests build [-h]
+                               [--format {go,manifest,markdown,rust,typescript,unittest}]
+                               [--typescript-runner {vitest,jest}]
+                               [--schemas SCHEMAS] [--spec SPEC] [--out OUT]
+                               [--title TITLE] [--clean]
+
+Generate language-neutral manifests or backend-specific test surfaces from the
+validated spec catalog, including Given/When/Then scenarios and model
+invariants.
+
+options:
+  -h, --help            show this help message and exit
+  --format {go,manifest,markdown,rust,typescript,unittest}
+                        manifest: language-neutral JSON for generators in
+                        Go/TypeScript/Rust/etc.; markdown: human-readable
+                        plan; go: Go backend; rust: Rust backend; typescript:
+                        TypeScript backend; unittest: Python backend (default:
+                        markdown)
+  --typescript-runner {vitest,jest}
+                        TypeScript test runner to target when
+                        --format=typescript (default: vitest)
+  --schemas SCHEMAS     directory of meta-schemas to validate against.
+                        Defaults to the canonical meta-schema directory.
+  --spec SPEC           directory of consumer YAML to render into a test plan.
+  --out OUT             output directory (default: ./test-plan)
+  --title TITLE         page title (default: 'Generated Test Plan')
+  --clean               wipe <out> before building

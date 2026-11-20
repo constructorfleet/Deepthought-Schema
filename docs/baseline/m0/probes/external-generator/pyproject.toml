@@ -1,0 +1,13 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "deepthought-m0-generator-probe"
+version = "0.0.1"
+
+[project.entry-points."deepthought.generators"]
+m0-probe = "m0_probe:ProbeGenerator"
+
+[tool.setuptools]
+py-modules = ["m0_probe"]

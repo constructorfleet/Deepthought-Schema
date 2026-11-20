@@ -1,0 +1,10 @@
+usage: deepthought tests [-h] {build} ...
+
+Generate catalog-backed test outputs from DeepThought specifications.
+
+positional arguments:
+  {build}
+    build     Generate test outputs from the validated catalog.
+
+options:
+  -h, --help  show this help message and exit

@@ -1,0 +1,17 @@
+usage: deepthought [-h] {validate,schemas,test-schema,checks,docs,tests} ...
+
+DeepThought toolkit: validate specifications and generate documentation,
+tests, and code from them.
+
+positional arguments:
+  {validate,schemas,test-schema,checks,docs,tests}
+    validate            Validate a directory of DeepThought YAML against the
+                        meta-schemas.
+    schemas             Print the path of the canonical meta-schema directory.
+    test-schema         Print the packaged test-manifest schema path or JSON.
+    checks              Machine-readable correctness manifests.
+    docs                Documentation generation.
+    tests               Generated test plans and correctness checks.
+
+options:
+  -h, --help            show this help message and exit

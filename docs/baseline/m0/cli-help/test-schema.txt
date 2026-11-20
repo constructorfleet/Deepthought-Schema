@@ -1,0 +1,8 @@
+usage: deepthought test-schema [-h] [--format {json,path}]
+
+Print the packaged JSON schema that defines DeepThought's language-neutral
+test manifest contract.
+
+options:
+  -h, --help            show this help message and exit
+  --format {json,path}  output format (default: path)
